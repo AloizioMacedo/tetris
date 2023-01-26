@@ -11,6 +11,7 @@ pub struct ColoredPoint(pub [i32; 2], pub Color32);
 pub struct Game {
     frozen_squares: Vec<ColoredPoint>,
     player_piece: Piece,
+    pub score: i32,
 }
 
 pub fn new_game() -> Game {
@@ -19,6 +20,7 @@ pub fn new_game() -> Game {
     Game {
         frozen_squares: Vec::new(),
         player_piece: get_piece_from_above(random_shape),
+        score: 0,
     }
 }
 
@@ -32,25 +34,26 @@ pub enum StepKind<T, R> {
     Move(T),
     Rotate(R),
     GoDown,
+    HardDrop,
 }
 
 impl Game {
     pub fn step(&mut self, step_kind: StepKind<Option<Movement>, Rotation>) {
         match step_kind {
-            StepKind::GoDown => {
-                self.force_piece_down_or_stick();
-            }
-            StepKind::Move(movement) => {
-                self.move_piece(movement);
-            }
-            StepKind::Rotate(rotation) => {
-                self.rotate_piece(rotation);
+            StepKind::GoDown => self.force_piece_down_or_stick(),
+            StepKind::Move(movement) => self.move_piece(movement),
+            StepKind::Rotate(rotation) => self.rotate_piece(rotation),
+            StepKind::HardDrop => {
+                self.score += self.player_piece.coords.iter().count() as i32;
+                self.drop_down()
             }
         }
 
         let full_lines_heights = self.get_full_lines_heights();
 
         if !full_lines_heights.is_empty() {
+            let n = full_lines_heights.iter().count() as i32;
+            self.score += n.pow(2) * 100;
             self.erase_lines(full_lines_heights);
         }
     }
@@ -162,6 +165,39 @@ impl Game {
             }
             Outcome::DoNothing => {
                 self.player_piece = phantom_piece;
+            }
+        }
+    }
+
+    fn drop_down(&mut self) {
+        let mut phantom_piece = self.player_piece.clone();
+
+        loop {
+            let mut next_phantom_piece = phantom_piece.clone();
+            next_phantom_piece.step_down();
+
+            if next_phantom_piece.hits_bottom()
+                || next_phantom_piece.intersect(
+                    &self
+                        .frozen_squares
+                        .iter()
+                        .map(|colored_point| colored_point.0)
+                        .collect(),
+                )
+            {
+                let new_piece: PieceShape = rand::random();
+                self.frozen_squares.extend(
+                    phantom_piece
+                        .coords
+                        .iter()
+                        .map(|coord| ColoredPoint(*coord, phantom_piece.color)),
+                );
+
+                self.player_piece = get_piece_from_above(new_piece);
+
+                break;
+            } else {
+                phantom_piece = next_phantom_piece;
             }
         }
     }

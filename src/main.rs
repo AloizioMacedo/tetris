@@ -23,6 +23,7 @@ enum Command<T, R> {
     NoCommand,
     Movement(T),
     Rotation(R),
+    DropDown,
 }
 
 struct MyApp {
@@ -85,6 +86,9 @@ impl eframe::App for MyApp {
             if self.is_paused {
                 ui.heading("PAUSED");
                 return;
+            } else {
+                let score = self.game.score;
+                ui.heading(format!("SCORE: {}", score));
             }
 
             self.paint_pieces(ui);
@@ -97,6 +101,7 @@ impl eframe::App for MyApp {
                 match self.current_move_command {
                     Command::Movement(movement) => self.game.step(StepKind::Move(Some(movement))),
                     Command::Rotation(rotation) => self.game.step(StepKind::Rotate(rotation)),
+                    Command::DropDown => self.game.step(StepKind::HardDrop),
                     _ => (),
                 }
                 self.fine_grained_time = time_now;
@@ -141,6 +146,7 @@ impl MyApp {
                 egui::Key::ArrowRight => Command::Movement(Movement::RIGHT),
                 egui::Key::E => Command::Rotation(Rotation::CW),
                 egui::Key::Q => Command::Rotation(Rotation::CCW),
+                egui::Key::Z => Command::DropDown,
                 _ => self.current_move_command,
             }
         } else {
