@@ -67,7 +67,13 @@ impl Game {
                                 .iter()
                                 .map(|coord| ColoredPoint(*coord, phantom_piece.color)),
                         );
+
+                        let old_piece = self.player_piece.clone();
                         self.player_piece = get_piece_from_above(new_piece);
+
+                        if self.player_piece.intersect(&old_piece.coords) {
+                            panic!()
+                        }
                     }
                     Outcome::Free => {
                         self.player_piece = phantom_piece;
