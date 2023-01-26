@@ -135,9 +135,18 @@ impl Piece {
         my_pieces.intersection(&other_pieces).count() > 0
     }
 
-    pub fn hits_border(&self) -> bool {
+    pub fn hits_bottom(&self) -> bool {
         for coord in self.coords.clone() {
             if coord[1] >= HEIGHT {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    pub fn hits_sides(&self) -> bool {
+        for coord in self.coords.clone() {
+            if coord[0] >= WIDTH || coord[0] <= 0 {
                 return true;
             }
         }

@@ -17,32 +17,69 @@ pub fn new_game() -> Game {
     }
 }
 
+enum Outcome {
+    SlideDown,
+    StickImmediately,
+    StickAfterMove,
+    Free,
+}
+
 impl Game {
     pub fn step(&mut self, movement: Option<Movement>) {
         let mut phantom_piece = self.player_piece.clone();
 
+        let mut outcome: Outcome = Outcome::Free;
         phantom_piece.make_move(movement);
+
+        for piece in self.frozen_pieces.iter() {
+            if phantom_piece.intersect(&piece) {
+                outcome = Outcome::SlideDown;
+            }
+        }
+
+        match outcome {
+            Outcome::SlideDown => phantom_piece = self.player_piece.clone(),
+            _ => (),
+        }
+
         phantom_piece.step_down();
 
-        let mut to_get_stuck: bool = false;
-
-        if phantom_piece.hits_border() {
-            to_get_stuck = true
+        if phantom_piece.hits_bottom() {
+            outcome = Outcome::StickImmediately
+        } else if phantom_piece.hits_sides() {
+            outcome = Outcome::SlideDown
         } else {
             for piece in self.frozen_pieces.iter() {
                 if phantom_piece.intersect(&piece) {
-                    to_get_stuck = true;
+                    outcome = match outcome {
+                        Outcome::Free => Outcome::StickAfterMove,
+                        Outcome::SlideDown => Outcome::StickImmediately,
+                        rest => rest,
+                    };
                 }
             }
         }
 
-        if to_get_stuck {
-            let new_piece: PieceShape = rand::random();
-            self.frozen_pieces.push(self.player_piece.clone());
-            self.player_piece = get_piece_from_above(new_piece);
-        } else {
-            self.player_piece.make_move(movement);
-            self.player_piece.step_down();
+        match outcome {
+            Outcome::StickImmediately => {
+                let new_piece: PieceShape = rand::random();
+                self.frozen_pieces.push(self.player_piece.clone());
+                self.player_piece = get_piece_from_above(new_piece);
+            }
+            Outcome::StickAfterMove => {
+                let new_piece: PieceShape = rand::random();
+                let mut to_freeze = self.player_piece.clone();
+                to_freeze.make_move(movement);
+                self.frozen_pieces.push(to_freeze);
+                self.player_piece = get_piece_from_above(new_piece);
+            }
+            Outcome::Free => {
+                self.player_piece.make_move(movement);
+                self.player_piece.step_down();
+            }
+            Outcome::SlideDown => {
+                self.player_piece.step_down();
+            }
         }
     }
 

@@ -1,9 +1,9 @@
-pub const SCALE: i32 = 20;
+pub const SCALE: i32 = 30;
 
 pub const WIDTH: i32 = 800;
-pub const HEIGHT: i32 = 640;
+pub const HEIGHT: i32 = 800;
 
-pub const FPS: f32 = 5.;
+pub const FPS: f32 = 4.;
 
 #[derive(Copy, Clone)]
 pub enum Movement {
