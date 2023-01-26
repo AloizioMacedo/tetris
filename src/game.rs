@@ -43,9 +43,9 @@ enum SoftDropEnd {
 }
 
 impl Game {
-    pub fn step(&mut self, step_kind: StepKind<Option<Movement>, Rotation>) {
+    pub fn step(&mut self, step_kind: StepKind<Option<Movement>, Rotation>) -> Result<(), ()> {
         match step_kind {
-            StepKind::GoDown => self.force_piece_down_or_stick(),
+            StepKind::GoDown => self.force_piece_down_or_stick()?,
             StepKind::Move(movement) => {
                 let is_soft_drop_end = self.move_piece(movement);
                 match is_soft_drop_end {
@@ -68,7 +68,9 @@ impl Game {
             let n = full_lines_heights.iter().count() as i32;
             self.score += n.pow(2) * 100;
             self.erase_lines(full_lines_heights);
-        }
+        };
+
+        Ok(())
     }
 
     fn rotate_piece(&mut self, rotation: Rotation) {
@@ -157,7 +159,7 @@ impl Game {
         }
     }
 
-    fn force_piece_down_or_stick(&mut self) {
+    fn force_piece_down_or_stick(&mut self) -> Result<(), ()> {
         let mut phantom_piece = self.player_piece.clone();
         let mut outcome: Outcome = Outcome::Free;
 
@@ -191,7 +193,7 @@ impl Game {
                 self.player_piece = get_piece_from_above(new_piece);
 
                 if self.player_piece.intersect(&old_piece.coords) {
-                    panic!()
+                    return Err(());
                 }
             }
             Outcome::Free => {
@@ -201,6 +203,8 @@ impl Game {
                 self.player_piece = phantom_piece;
             }
         }
+
+        return Ok(());
     }
 
     fn drop_down(&mut self) {

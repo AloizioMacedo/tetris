@@ -32,6 +32,7 @@ struct MyApp {
     fine_grained_time: Instant,
     current_move_command: Command<Movement, Rotation>,
     is_paused: bool,
+    game_over: bool,
 }
 
 impl Default for MyApp {
@@ -43,6 +44,7 @@ impl Default for MyApp {
             fine_grained_time: now,
             current_move_command: Command::NoCommand,
             is_paused: false,
+            game_over: false,
         }
     }
 }
@@ -50,6 +52,13 @@ impl Default for MyApp {
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
+            if self.game_over {
+                ui.centered_and_justified(|ui| {
+                    ui.heading(format!("Game Over!\nFinal Score: {}", self.game.score))
+                });
+                return;
+            }
+
             let events = ui.input().events.clone();
 
             for event in &events {
@@ -84,7 +93,7 @@ impl eframe::App for MyApp {
             paint_rectangle(ui);
 
             if self.is_paused {
-                ui.heading("PAUSED");
+                ui.centered_and_justified(|ui| ui.heading("PAUSED"));
                 return;
             } else {
                 let score = self.game.score;
@@ -99,9 +108,13 @@ impl eframe::App for MyApp {
 
             if fine_grained_delta_t >= Duration::from_millis((77. * (1. / FPS)) as u64) {
                 match self.current_move_command {
-                    Command::Movement(movement) => self.game.step(StepKind::Move(Some(movement))),
-                    Command::Rotation(rotation) => self.game.step(StepKind::Rotate(rotation)),
-                    Command::DropDown => self.game.step(StepKind::HardDrop),
+                    Command::Movement(movement) => {
+                        self.game.step(StepKind::Move(Some(movement))).unwrap()
+                    }
+                    Command::Rotation(rotation) => {
+                        self.game.step(StepKind::Rotate(rotation)).unwrap()
+                    }
+                    Command::DropDown => self.game.step(StepKind::HardDrop).unwrap(),
                     _ => (),
                 }
                 self.fine_grained_time = time_now;
@@ -109,7 +122,13 @@ impl eframe::App for MyApp {
             }
 
             if delta_t >= Duration::from_millis((1000. * (1. / FPS)) as u64) {
-                self.game.step(StepKind::GoDown);
+                let game_still_on = self.game.step(StepKind::GoDown);
+
+                match game_still_on {
+                    Ok(()) => self.game_over = false,
+                    Err(()) => self.game_over = true,
+                }
+
                 self.time = time_now;
                 self.current_move_command = Command::NoCommand;
             }
