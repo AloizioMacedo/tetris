@@ -52,6 +52,24 @@ impl eframe::App for MyApp {
             let events = ui.input().events.clone();
 
             for event in &events {
+                self.is_paused = match event {
+                    egui::Event::Key {
+                        key,
+                        pressed,
+                        modifiers: _,
+                    } => match key {
+                        egui::Key::Space => {
+                            if *pressed {
+                                !self.is_paused
+                            } else {
+                                self.is_paused
+                            }
+                        }
+                        _ => self.is_paused,
+                    },
+                    _ => self.is_paused,
+                };
+
                 self.current_move_command = match event {
                     egui::Event::Key {
                         key,
