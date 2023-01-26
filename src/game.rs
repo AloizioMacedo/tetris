@@ -37,14 +37,27 @@ pub enum StepKind<T, R> {
     HardDrop,
 }
 
+enum SoftDropEnd {
+    Yes,
+    No,
+}
+
 impl Game {
     pub fn step(&mut self, step_kind: StepKind<Option<Movement>, Rotation>) {
         match step_kind {
             StepKind::GoDown => self.force_piece_down_or_stick(),
-            StepKind::Move(movement) => self.move_piece(movement),
+            StepKind::Move(movement) => {
+                let is_soft_drop_end = self.move_piece(movement);
+                match is_soft_drop_end {
+                    SoftDropEnd::Yes => {
+                        self.score += self.player_piece.coords.iter().count() as i32
+                    }
+                    _ => (),
+                }
+            }
             StepKind::Rotate(rotation) => self.rotate_piece(rotation),
             StepKind::HardDrop => {
-                self.score += self.player_piece.coords.iter().count() as i32;
+                self.score += 2 * self.player_piece.coords.iter().count() as i32;
                 self.drop_down()
             }
         }
@@ -92,7 +105,7 @@ impl Game {
         }
     }
 
-    fn move_piece(&mut self, movement: Option<Movement>) {
+    fn move_piece(&mut self, movement: Option<Movement>) -> SoftDropEnd {
         let mut phantom_piece = self.player_piece.clone();
 
         let mut outcome: Outcome = Outcome::Free;
@@ -110,7 +123,13 @@ impl Game {
                 .map(|colored_point| colored_point.0)
                 .collect(),
         ) {
-            outcome = Outcome::Stick;
+            match movement {
+                Some(movement) => match movement {
+                    Movement::DOWN => outcome = Outcome::Stick,
+                    _ => outcome = Outcome::DoNothing,
+                },
+                _ => outcome = Outcome::DoNothing,
+            }
         }
 
         if phantom_piece.hits_sides() {
@@ -118,8 +137,23 @@ impl Game {
         }
 
         match outcome {
-            Outcome::Free => self.player_piece = phantom_piece,
-            _ => (),
+            Outcome::Free => {
+                self.player_piece = phantom_piece;
+                return SoftDropEnd::No;
+            }
+            Outcome::Stick => {
+                let new_piece: PieceShape = rand::random();
+                self.frozen_squares.extend(
+                    self.player_piece
+                        .coords
+                        .iter()
+                        .map(|coord| ColoredPoint(*coord, phantom_piece.color)),
+                );
+
+                self.player_piece = get_piece_from_above(new_piece);
+                return SoftDropEnd::Yes;
+            }
+            _ => return SoftDropEnd::No,
         }
     }
 
