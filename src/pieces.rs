@@ -12,19 +12,21 @@ pub enum PieceShape {
     I,
     Z,
     InvertedZ,
+    InvertedL,
     Square,
     T,
 }
 
 impl Distribution<PieceShape> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> PieceShape {
-        match rng.gen_range(0..=5) {
+        match rng.gen_range(0..=6) {
             0 => PieceShape::L,
             1 => PieceShape::I,
             2 => PieceShape::Z,
             3 => PieceShape::Square,
             4 => PieceShape::T,
             5 => PieceShape::InvertedZ,
+            6 => PieceShape::InvertedL,
             _ => panic!(),
         }
     }
@@ -41,6 +43,16 @@ pub fn get_piece_from_above(piece_shape: PieceShape) -> Piece {
             ],
             center: [WIDTH / 2, SCALE],
             color: Color32::from_rgb(255, 165, 0),
+        },
+        PieceShape::InvertedL => Piece {
+            coords: vec![
+                [WIDTH / 2, 0],
+                [WIDTH / 2, SCALE],
+                [WIDTH / 2, 2 * SCALE],
+                [WIDTH / 2 - SCALE, 2 * SCALE],
+            ],
+            center: [WIDTH / 2, SCALE],
+            color: Color32::WHITE,
         },
         PieceShape::I => Piece {
             coords: vec![
