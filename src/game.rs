@@ -1,5 +1,5 @@
 use crate::{
-    constants::{Movement, Rotation},
+    constants::{Movement, Rotation, HEIGHT, SCALE, WIDTH},
     pieces::{get_piece_from_above, Piece, PieceShape},
 };
 
@@ -66,6 +66,10 @@ impl Game {
             StepKind::Move(movement) => {
                 phantom_piece.make_move(movement);
 
+                if phantom_piece.hits_bottom() {
+                    outcome = Outcome::Stick
+                }
+
                 for piece in self.frozen_pieces.iter() {
                     if phantom_piece.intersect(&piece) {
                         outcome = Outcome::DoNothing;
@@ -115,5 +119,32 @@ impl Game {
         pieces.push(self.player_piece.clone());
 
         pieces
+    }
+
+    fn get_frozen_squares(&self) -> Vec<[i32; 2]> {
+        let mut squares = Vec::new();
+
+        for frozen_square in self.frozen_pieces.iter() {
+            for coord in frozen_square.coords.iter() {
+                squares.push(*coord);
+            }
+        }
+
+        squares
+    }
+
+    fn get_full_lines_heights(&self) -> Vec<i32> {
+        let mut full_lines_heights = Vec::new();
+
+        for i in 0..HEIGHT / SCALE {
+            let frozen_squares = self.get_frozen_squares();
+
+            let line_i = frozen_squares.iter().filter(|tup| tup[1] == (SCALE * i));
+            if line_i.count() == (WIDTH / SCALE) as usize {
+                full_lines_heights.push(SCALE * i);
+            }
+        }
+
+        full_lines_heights
     }
 }

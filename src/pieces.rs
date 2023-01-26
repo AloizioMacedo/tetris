@@ -11,18 +11,20 @@ pub enum PieceShape {
     L,
     I,
     Z,
+    InvertedZ,
     Square,
     T,
 }
 
 impl Distribution<PieceShape> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> PieceShape {
-        match rng.gen_range(0..=4) {
+        match rng.gen_range(0..=5) {
             0 => PieceShape::L,
             1 => PieceShape::I,
             2 => PieceShape::Z,
             3 => PieceShape::Square,
             4 => PieceShape::T,
+            5 => PieceShape::InvertedZ,
             _ => panic!(),
         }
     }
@@ -37,7 +39,7 @@ pub fn get_piece_from_above(piece_shape: PieceShape) -> Piece {
                 [WIDTH / 2, 2 * SCALE],
                 [WIDTH / 2 + SCALE, 2 * SCALE],
             ],
-            center: [WIDTH / 2, 2 * SCALE + SCALE / 2],
+            center: [WIDTH / 2, SCALE],
             color: Color32::from_rgb(255, 165, 0),
         },
         PieceShape::I => Piece {
@@ -46,9 +48,8 @@ pub fn get_piece_from_above(piece_shape: PieceShape) -> Piece {
                 [WIDTH / 2, SCALE],
                 [WIDTH / 2, 2 * SCALE],
                 [WIDTH / 2, 3 * SCALE],
-                [WIDTH / 2, 4 * SCALE],
             ],
-            center: [WIDTH / 2, 2 * SCALE + SCALE / 2],
+            center: [WIDTH / 2, 2 * SCALE],
             color: Color32::from_rgb(173, 216, 230),
         },
         PieceShape::Z => Piece {
@@ -58,8 +59,8 @@ pub fn get_piece_from_above(piece_shape: PieceShape) -> Piece {
                 [WIDTH / 2 + SCALE, SCALE],
                 [WIDTH / 2 + SCALE, 2 * SCALE],
             ],
-            center: [WIDTH / 2 + SCALE / 2, SCALE + SCALE / 2],
-            color: Color32::from_rgb(173, 216, 230),
+            center: [WIDTH / 2, SCALE],
+            color: Color32::GREEN,
         },
         PieceShape::Square => Piece {
             coords: vec![
@@ -68,8 +69,8 @@ pub fn get_piece_from_above(piece_shape: PieceShape) -> Piece {
                 [WIDTH / 2 + SCALE, SCALE],
                 [WIDTH / 2 + SCALE, 0],
             ],
-            center: [WIDTH / 2 + SCALE + SCALE / 2, SCALE + SCALE / 2],
-            color: Color32::from_rgb(249, 215, 28),
+            center: [WIDTH / 2 + SCALE / 2, SCALE / 2],
+            color: Color32::from_rgb(255, 255, 102),
         },
         PieceShape::T => Piece {
             coords: vec![
@@ -78,8 +79,18 @@ pub fn get_piece_from_above(piece_shape: PieceShape) -> Piece {
                 [WIDTH / 2 + SCALE, 0],
                 [WIDTH / 2, SCALE],
             ],
-            center: [WIDTH / 2 + SCALE + SCALE / 2, SCALE + SCALE / 2],
+            center: [WIDTH / 2, 0],
             color: Color32::from_rgb(255, 20, 147),
+        },
+        PieceShape::InvertedZ => Piece {
+            coords: vec![
+                [WIDTH / 2 + SCALE, 0],
+                [WIDTH / 2 + SCALE, SCALE],
+                [WIDTH / 2, SCALE],
+                [WIDTH / 2, 2 * SCALE],
+            ],
+            center: [WIDTH / 2, SCALE],
+            color: Color32::RED,
         },
     }
 }
@@ -131,7 +142,11 @@ impl Piece {
         self.coords = match movement {
             Some(x) => match x {
                 Movement::UP => self.coords.clone(),
-                Movement::DOWN => self.coords.clone(),
+                Movement::DOWN => self
+                    .coords
+                    .iter()
+                    .map(|tup| [tup[0], tup[1] + SCALE])
+                    .collect(),
                 Movement::RIGHT => self
                     .coords
                     .iter()
@@ -149,7 +164,7 @@ impl Piece {
         self.center = match movement {
             Some(x) => match x {
                 Movement::UP => self.center,
-                Movement::DOWN => self.center,
+                Movement::DOWN => [self.center[0], self.center[1] + SCALE],
                 Movement::RIGHT => [self.center[0] + SCALE, self.center[1]],
                 Movement::LEFT => [self.center[0] - SCALE, self.center[1]],
             },
