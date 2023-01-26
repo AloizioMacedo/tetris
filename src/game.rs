@@ -36,107 +36,15 @@ pub enum StepKind<T, R> {
 
 impl Game {
     pub fn step(&mut self, step_kind: StepKind<Option<Movement>, Rotation>) {
-        let mut phantom_piece = self.player_piece.clone();
-
-        let mut outcome: Outcome = Outcome::Free;
-
         match step_kind {
             StepKind::GoDown => {
-                phantom_piece.step_down();
-
-                if phantom_piece.hits_bottom() {
-                    outcome = Outcome::Stick
-                }
-
-                if phantom_piece.intersect(
-                    &self
-                        .frozen_squares
-                        .iter()
-                        .map(|colored_point| colored_point.0)
-                        .collect(),
-                ) {
-                    outcome = Outcome::Stick;
-                }
-
-                match outcome {
-                    Outcome::Stick => {
-                        let new_piece: PieceShape = rand::random();
-                        self.frozen_squares.extend(
-                            self.player_piece
-                                .coords
-                                .iter()
-                                .map(|coord| ColoredPoint(*coord, phantom_piece.color)),
-                        );
-
-                        let old_piece = self.player_piece.clone();
-                        self.player_piece = get_piece_from_above(new_piece);
-
-                        if self.player_piece.intersect(&old_piece.coords) {
-                            panic!()
-                        }
-                    }
-                    Outcome::Free => {
-                        self.player_piece = phantom_piece;
-                    }
-                    Outcome::DoNothing => {
-                        self.player_piece = phantom_piece;
-                    }
-                }
+                self.force_piece_down_or_stick();
             }
             StepKind::Move(movement) => {
-                phantom_piece.make_move(movement);
-
-                if phantom_piece.hits_bottom() {
-                    outcome = Outcome::Stick
-                }
-
-                if phantom_piece.intersect(
-                    &self
-                        .frozen_squares
-                        .iter()
-                        .map(|colored_point| colored_point.0)
-                        .collect(),
-                ) {
-                    outcome = Outcome::Stick;
-                }
-
-                if phantom_piece.hits_sides() {
-                    outcome = Outcome::DoNothing;
-                }
-
-                match outcome {
-                    Outcome::Free => self.player_piece = phantom_piece,
-                    _ => (),
-                }
+                self.move_piece(movement);
             }
             StepKind::Rotate(rotation) => {
-                match rotation {
-                    Rotation::CCW => phantom_piece.rotate_ccw(),
-                    Rotation::CW => phantom_piece.rotate_cw(),
-                };
-
-                if phantom_piece.intersect(
-                    &self
-                        .frozen_squares
-                        .iter()
-                        .map(|colored_point| colored_point.0)
-                        .collect(),
-                ) {
-                    outcome = Outcome::Stick;
-                }
-
-                if phantom_piece.hits_sides() {
-                    outcome = Outcome::DoNothing;
-                }
-
-                if phantom_piece.hits_bottom() {
-                    outcome = Outcome::DoNothing
-                }
-
-                match outcome {
-                    Outcome::Free => self.player_piece = phantom_piece,
-                    _ => (),
-                }
+                self.rotate_piece(rotation);
             }
         }
 
@@ -144,6 +52,117 @@ impl Game {
 
         if !full_lines_heights.is_empty() {
             self.erase_lines(full_lines_heights);
+        }
+    }
+
+    fn rotate_piece(&mut self, rotation: Rotation) {
+        let mut phantom_piece = self.player_piece.clone();
+
+        let mut outcome: Outcome = Outcome::Free;
+
+        match rotation {
+            Rotation::CCW => phantom_piece.rotate_ccw(),
+            Rotation::CW => phantom_piece.rotate_cw(),
+        };
+
+        if phantom_piece.intersect(
+            &self
+                .frozen_squares
+                .iter()
+                .map(|colored_point| colored_point.0)
+                .collect(),
+        ) {
+            outcome = Outcome::Stick;
+        }
+
+        if phantom_piece.hits_sides() {
+            outcome = Outcome::DoNothing;
+        }
+
+        if phantom_piece.hits_bottom() {
+            outcome = Outcome::DoNothing
+        }
+
+        match outcome {
+            Outcome::Free => self.player_piece = phantom_piece,
+            _ => (),
+        }
+    }
+
+    fn move_piece(&mut self, movement: Option<Movement>) {
+        let mut phantom_piece = self.player_piece.clone();
+
+        let mut outcome: Outcome = Outcome::Free;
+
+        phantom_piece.make_move(movement);
+
+        if phantom_piece.hits_bottom() {
+            outcome = Outcome::Stick
+        }
+
+        if phantom_piece.intersect(
+            &self
+                .frozen_squares
+                .iter()
+                .map(|colored_point| colored_point.0)
+                .collect(),
+        ) {
+            outcome = Outcome::Stick;
+        }
+
+        if phantom_piece.hits_sides() {
+            outcome = Outcome::DoNothing;
+        }
+
+        match outcome {
+            Outcome::Free => self.player_piece = phantom_piece,
+            _ => (),
+        }
+    }
+
+    fn force_piece_down_or_stick(&mut self) {
+        let mut phantom_piece = self.player_piece.clone();
+        let mut outcome: Outcome = Outcome::Free;
+
+        phantom_piece.step_down();
+
+        if phantom_piece.hits_bottom() {
+            outcome = Outcome::Stick
+        }
+
+        if phantom_piece.intersect(
+            &self
+                .frozen_squares
+                .iter()
+                .map(|colored_point| colored_point.0)
+                .collect(),
+        ) {
+            outcome = Outcome::Stick;
+        }
+
+        match outcome {
+            Outcome::Stick => {
+                let new_piece: PieceShape = rand::random();
+                self.frozen_squares.extend(
+                    self.player_piece
+                        .coords
+                        .iter()
+                        .map(|coord| ColoredPoint(*coord, phantom_piece.color)),
+                );
+
+                let old_piece = self.player_piece.clone();
+                self.player_piece = get_piece_from_above(new_piece);
+
+                if self.player_piece.intersect(&old_piece.coords) {
+                    panic!()
+                }
+            }
+            Outcome::Free => {
+                self.player_piece = phantom_piece;
+            }
+            Outcome::DoNothing => {
+                self.player_piece = phantom_piece;
+            }
         }
     }
 
