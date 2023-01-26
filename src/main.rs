@@ -11,7 +11,11 @@ fn main() {
         initial_window_size: Some(egui::vec2(WIDTH as f32, HEIGHT as f32)),
         ..Default::default()
     };
-    eframe::run_native("Snake", options, Box::new(|_cc| Box::new(MyApp::default())))
+    eframe::run_native(
+        "Tetris",
+        options,
+        Box::new(|_cc| Box::new(MyApp::default())),
+    )
 }
 
 #[derive(Copy, Clone)]
