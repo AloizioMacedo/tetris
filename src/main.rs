@@ -127,23 +127,21 @@ impl MyApp {
     }
 
     fn paint_pieces(&mut self, ui: &mut egui::Ui) {
-        for piece in self.game.list_pieces() {
-            for coord in piece.coords {
-                ui.painter().rect_filled(
-                    Rect {
-                        min: Pos2 {
-                            x: coord[0] as f32 - SCALE as f32 / 2.,
-                            y: coord[1] as f32 - SCALE as f32 / 2.,
-                        },
-                        max: Pos2 {
-                            x: coord[0] as f32 + SCALE as f32 / 2.,
-                            y: coord[1] as f32 + SCALE as f32 / 2.,
-                        },
+        for square in self.game.list_squares() {
+            ui.painter().rect_filled(
+                Rect {
+                    min: Pos2 {
+                        x: square.0[0] as f32 - SCALE as f32 / 2.,
+                        y: square.0[1] as f32 - SCALE as f32 / 2.,
                     },
-                    SCALE as f32 / 5.,
-                    piece.color,
-                )
-            }
+                    max: Pos2 {
+                        x: square.0[0] as f32 + SCALE as f32 / 2.,
+                        y: square.0[1] as f32 + SCALE as f32 / 2.,
+                    },
+                },
+                SCALE as f32 / 5.,
+                square.1,
+            )
         }
     }
 }

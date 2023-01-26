@@ -1,10 +1,15 @@
+use egui::Color32;
+
 use crate::{
     constants::{Movement, Rotation, HEIGHT, SCALE, WIDTH},
     pieces::{get_piece_from_above, Piece, PieceShape},
 };
 
+#[derive(Clone, Copy)]
+pub struct ColoredPoint(pub [i32; 2], pub Color32);
+
 pub struct Game {
-    frozen_pieces: Vec<Piece>,
+    frozen_squares: Vec<ColoredPoint>,
     player_piece: Piece,
 }
 
@@ -12,7 +17,7 @@ pub fn new_game() -> Game {
     let random_shape: PieceShape = rand::random();
 
     Game {
-        frozen_pieces: Vec::new(),
+        frozen_squares: Vec::new(),
         player_piece: get_piece_from_above(random_shape),
     }
 }
@@ -43,16 +48,25 @@ impl Game {
                     outcome = Outcome::Stick
                 }
 
-                for piece in self.frozen_pieces.iter() {
-                    if phantom_piece.intersect(&piece) {
-                        outcome = Outcome::Stick;
-                    }
+                if phantom_piece.intersect(
+                    &self
+                        .frozen_squares
+                        .iter()
+                        .map(|colored_point| colored_point.0)
+                        .collect(),
+                ) {
+                    outcome = Outcome::Stick;
                 }
 
                 match outcome {
                     Outcome::Stick => {
                         let new_piece: PieceShape = rand::random();
-                        self.frozen_pieces.push(self.player_piece.clone());
+                        self.frozen_squares.extend(
+                            self.player_piece
+                                .coords
+                                .iter()
+                                .map(|coord| ColoredPoint(*coord, phantom_piece.color)),
+                        );
                         self.player_piece = get_piece_from_above(new_piece);
                     }
                     Outcome::Free => {
@@ -70,10 +84,14 @@ impl Game {
                     outcome = Outcome::Stick
                 }
 
-                for piece in self.frozen_pieces.iter() {
-                    if phantom_piece.intersect(&piece) {
-                        outcome = Outcome::DoNothing;
-                    }
+                if phantom_piece.intersect(
+                    &self
+                        .frozen_squares
+                        .iter()
+                        .map(|colored_point| colored_point.0)
+                        .collect(),
+                ) {
+                    outcome = Outcome::Stick;
                 }
 
                 if phantom_piece.hits_sides() {
@@ -91,10 +109,14 @@ impl Game {
                     Rotation::CW => phantom_piece.rotate_cw(),
                 };
 
-                for piece in self.frozen_pieces.iter() {
-                    if phantom_piece.intersect(&piece) {
-                        outcome = Outcome::DoNothing
-                    }
+                if phantom_piece.intersect(
+                    &self
+                        .frozen_squares
+                        .iter()
+                        .map(|colored_point| colored_point.0)
+                        .collect(),
+                ) {
+                    outcome = Outcome::Stick;
                 }
 
                 if phantom_piece.hits_sides() {
@@ -113,38 +135,40 @@ impl Game {
         }
     }
 
-    pub fn list_pieces(&self) -> Vec<Piece> {
-        let mut pieces = self.frozen_pieces.clone();
+    pub fn list_squares(&self) -> Vec<ColoredPoint> {
+        let mut colored_points = self.frozen_squares.clone();
 
-        pieces.push(self.player_piece.clone());
-
-        pieces
-    }
-
-    fn get_frozen_squares(&self) -> Vec<[i32; 2]> {
-        let mut squares = Vec::new();
-
-        for frozen_square in self.frozen_pieces.iter() {
-            for coord in frozen_square.coords.iter() {
-                squares.push(*coord);
-            }
+        for coord in self.player_piece.coords.iter() {
+            colored_points.push(ColoredPoint(*coord, self.player_piece.color))
         }
 
-        squares
+        colored_points
     }
 
-    fn get_full_lines_heights(&self) -> Vec<i32> {
-        let mut full_lines_heights = Vec::new();
+    // fn get_frozen_squares(&self) -> Vec<[i32; 2]> {
+    //     let mut squares = Vec::new();
 
-        for i in 0..HEIGHT / SCALE {
-            let frozen_squares = self.get_frozen_squares();
+    //     for frozen_square in self.frozen_squares.iter() {
+    //         for coord in frozen_square.coords.iter() {
+    //             squares.push(*coord);
+    //         }
+    //     }
 
-            let line_i = frozen_squares.iter().filter(|tup| tup[1] == (SCALE * i));
-            if line_i.count() == (WIDTH / SCALE) as usize {
-                full_lines_heights.push(SCALE * i);
-            }
-        }
+    //     squares
+    // }
 
-        full_lines_heights
-    }
+    // fn get_full_lines_heights(&self) -> Vec<i32> {
+    //     let mut full_lines_heights = Vec::new();
+
+    //     for i in 0..HEIGHT / SCALE {
+    //         let frozen_squares = self.get_frozen_squares();
+
+    //         let line_i = frozen_squares.iter().filter(|tup| tup[1] == (SCALE * i));
+    //         if line_i.count() == (WIDTH / SCALE) as usize {
+    //             full_lines_heights.push(SCALE * i);
+    //         }
+    //     }
+
+    //     full_lines_heights
+    // }
 }

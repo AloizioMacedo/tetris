@@ -172,11 +172,11 @@ impl Piece {
         };
     }
 
-    pub fn intersect(&self, piece: &Piece) -> bool {
+    pub fn intersect(&self, points: &Vec<[i32; 2]>) -> bool {
         let my_pieces: HashSet<&[i32; 2]> = HashSet::from_iter(self.coords.iter());
-        let other_pieces: HashSet<&[i32; 2]> = HashSet::from_iter(piece.coords.iter());
+        let points_set: HashSet<&[i32; 2]> = HashSet::from_iter(points.iter());
 
-        my_pieces.intersection(&other_pieces).count() > 0
+        my_pieces.intersection(&points_set).count() > 0
     }
 
     pub fn hits_bottom(&self) -> bool {
