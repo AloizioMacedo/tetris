@@ -1,6 +1,6 @@
 use egui::{Color32, Pos2, Rect, Stroke};
-use tetris::constants::{Movement, FPS, HEIGHT, SCALE, WIDTH};
-use tetris::game::{new_game, Game};
+use tetris::constants::{Movement, Rotation, FPS, HEIGHT, SCALE, WIDTH};
+use tetris::game::{new_game, Game, StepKind};
 
 use std::time::{Duration, Instant};
 
@@ -14,19 +14,29 @@ fn main() {
     eframe::run_native("Snake", options, Box::new(|_cc| Box::new(MyApp::default())))
 }
 
+#[derive(Copy, Clone)]
+enum Command<T, R> {
+    NoCommand,
+    Movement(T),
+    Rotation(R),
+}
+
 struct MyApp {
     game: Game,
     time: Instant,
-    current_move_command: Option<Movement>,
+    fine_grained_time: Instant,
+    current_move_command: Command<Movement, Rotation>,
     is_paused: bool,
 }
 
 impl Default for MyApp {
     fn default() -> Self {
+        let now = Instant::now();
         Self {
             game: new_game(),
-            time: Instant::now(),
-            current_move_command: None,
+            time: now,
+            fine_grained_time: now,
+            current_move_command: Command::NoCommand,
             is_paused: false,
         }
     }
@@ -43,7 +53,7 @@ impl eframe::App for MyApp {
                         key,
                         pressed,
                         modifiers: _,
-                    } => self.get_movement(pressed, key),
+                    } => self.get_command(pressed, key),
                     _ => self.current_move_command,
                 }
             }
@@ -59,11 +69,22 @@ impl eframe::App for MyApp {
 
             let time_now = Instant::now();
             let delta_t = time_now.duration_since(self.time);
+            let fine_grained_delta_t = time_now.duration_since(self.fine_grained_time);
+
+            if fine_grained_delta_t >= Duration::from_millis((151. * (1. / FPS)) as u64) {
+                match self.current_move_command {
+                    Command::Movement(movement) => self.game.step(StepKind::Move(Some(movement))),
+                    Command::Rotation(rotation) => self.game.step(StepKind::Rotate(rotation)),
+                    _ => (),
+                }
+                self.fine_grained_time = time_now;
+                self.current_move_command = Command::NoCommand;
+            }
 
             if delta_t >= Duration::from_millis((1000. * (1. / FPS)) as u64) {
-                self.game.step(self.current_move_command);
+                self.game.step(StepKind::GoDown);
                 self.time = time_now;
-                self.current_move_command = None;
+                self.current_move_command = Command::NoCommand;
             }
         });
 
@@ -89,13 +110,15 @@ fn paint_rectangle(ui: &mut egui::Ui) {
 }
 
 impl MyApp {
-    fn get_movement(&self, pressed: &bool, key: &egui::Key) -> Option<Movement> {
+    fn get_command(&self, pressed: &bool, key: &egui::Key) -> Command<Movement, Rotation> {
         if *pressed {
             match key {
-                egui::Key::ArrowUp => Some(Movement::UP),
-                egui::Key::ArrowDown => Some(Movement::DOWN),
-                egui::Key::ArrowLeft => Some(Movement::LEFT),
-                egui::Key::ArrowRight => Some(Movement::RIGHT),
+                egui::Key::ArrowUp => Command::Movement(Movement::UP),
+                egui::Key::ArrowDown => Command::Movement(Movement::DOWN),
+                egui::Key::ArrowLeft => Command::Movement(Movement::LEFT),
+                egui::Key::ArrowRight => Command::Movement(Movement::RIGHT),
+                egui::Key::E => Command::Rotation(Rotation::CW),
+                egui::Key::Q => Command::Rotation(Rotation::CCW),
                 _ => self.current_move_command,
             }
         } else {

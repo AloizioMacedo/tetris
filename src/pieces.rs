@@ -93,11 +93,29 @@ pub struct Piece {
 
 impl Piece {
     pub fn rotate_ccw(&mut self) {
-        self.coords = self.coords.iter().map(|tup| [-tup[1], tup[0]]).collect();
+        let translated_coords: Vec<[i32; 2]> = self
+            .coords
+            .iter()
+            .map(|tup| [tup[0] - self.center[0], tup[1] - self.center[1]])
+            .collect();
+
+        self.coords = translated_coords
+            .iter()
+            .map(|tup| [-tup[1] + self.center[0], tup[0] + self.center[1]])
+            .collect();
     }
 
     pub fn rotate_cw(&mut self) {
-        self.coords = self.coords.iter().map(|tup| [tup[1], -tup[0]]).collect();
+        let translated_coords: Vec<[i32; 2]> = self
+            .coords
+            .iter()
+            .map(|tup| [tup[0] - self.center[0], tup[1] - self.center[1]])
+            .collect();
+
+        self.coords = translated_coords
+            .iter()
+            .map(|tup| [tup[1] + self.center[0], -tup[0] + self.center[1]])
+            .collect();
     }
 
     pub fn step_down(&mut self) {
@@ -106,6 +124,7 @@ impl Piece {
             .iter()
             .map(|tup| [tup[0], tup[1] + SCALE])
             .collect();
+        self.center = [self.center[0], self.center[1] + SCALE]
     }
 
     pub fn make_move(&mut self, movement: Option<Movement>) {
@@ -125,7 +144,17 @@ impl Piece {
                     .collect(),
             },
             None => self.coords.clone(),
-        }
+        };
+
+        self.center = match movement {
+            Some(x) => match x {
+                Movement::UP => self.center,
+                Movement::DOWN => self.center,
+                Movement::RIGHT => [self.center[0] + SCALE, self.center[1]],
+                Movement::LEFT => [self.center[0] - SCALE, self.center[1]],
+            },
+            None => self.center,
+        };
     }
 
     pub fn intersect(&self, piece: &Piece) -> bool {
