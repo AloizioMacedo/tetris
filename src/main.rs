@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use egui::{Color32, Pos2, Rect, Stroke};
 use tetris::constants::{Movement, Rotation, FPS, HEIGHT, SCALE, WIDTH};
 use tetris::game::{new_game, Game, StepKind};
@@ -5,8 +7,6 @@ use tetris::game::{new_game, Game, StepKind};
 use std::time::{Duration, Instant};
 
 fn main() {
-    // Log to stdout (if you run with `RUST_LOG=debug`).
-
     let options = eframe::NativeOptions {
         initial_window_size: Some(egui::vec2(WIDTH as f32, HEIGHT as f32)),
         ..Default::default()
