@@ -101,6 +101,7 @@ impl eframe::App for MyApp {
             }
 
             self.paint_pieces(ui);
+            self.paint_projection(ui);
 
             let time_now = Instant::now();
             let delta_t = time_now.duration_since(self.time);
@@ -188,6 +189,50 @@ impl MyApp {
                 },
                 SCALE as f32 / 5.,
                 square.1,
+            )
+        }
+    }
+
+    fn paint_projection(&mut self, ui: &mut egui::Ui) {
+        let mut phantom_piece = self.game.player_piece.clone();
+
+        loop {
+            let mut next_phantom_piece = phantom_piece.clone();
+            next_phantom_piece.step_down();
+
+            if next_phantom_piece.hits_bottom()
+                || next_phantom_piece.intersect(
+                    &self
+                        .game
+                        .frozen_squares
+                        .iter()
+                        .map(|colored_point| colored_point.0)
+                        .collect(),
+                )
+            {
+                break;
+            } else {
+                phantom_piece = next_phantom_piece;
+            }
+        }
+
+        for square in phantom_piece.coords {
+            ui.painter().rect_stroke(
+                Rect {
+                    min: Pos2 {
+                        x: square[0] as f32 - SCALE as f32 / 2.,
+                        y: square[1] as f32 - SCALE as f32 / 2.,
+                    },
+                    max: Pos2 {
+                        x: square[0] as f32 + SCALE as f32 / 2.,
+                        y: square[1] as f32 + SCALE as f32 / 2.,
+                    },
+                },
+                SCALE as f32 / 5.,
+                Stroke {
+                    width: 1.,
+                    color: phantom_piece.color,
+                },
             )
         }
     }

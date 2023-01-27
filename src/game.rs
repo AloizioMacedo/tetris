@@ -9,8 +9,8 @@ use crate::{
 pub struct ColoredPoint(pub [i32; 2], pub Color32);
 
 pub struct Game {
-    frozen_squares: Vec<ColoredPoint>,
-    player_piece: Piece,
+    pub frozen_squares: Vec<ColoredPoint>,
+    pub player_piece: Piece,
     pub score: i32,
 }
 
