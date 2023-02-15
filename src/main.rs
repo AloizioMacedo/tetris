@@ -107,7 +107,7 @@ impl eframe::App for MyApp {
             let delta_t = time_now.duration_since(self.time);
             let fine_grained_delta_t = time_now.duration_since(self.fine_grained_time);
 
-            if fine_grained_delta_t >= Duration::from_millis((77. * (1. / FPS)) as u64) {
+            if fine_grained_delta_t >= Duration::from_millis((10. * (1. / FPS)) as u64) {
                 match self.current_move_command {
                     Command::Movement(movement) => {
                         self.game.step(StepKind::Move(Some(movement))).unwrap()
@@ -122,7 +122,7 @@ impl eframe::App for MyApp {
                 self.current_move_command = Command::NoCommand;
             }
 
-            if delta_t >= Duration::from_millis((1000. * (1. / FPS)) as u64) {
+            if delta_t >= Duration::from_millis((2500. * (1. / FPS)) as u64) {
                 let game_still_on = self.game.step(StepKind::GoDown);
 
                 match game_still_on {
