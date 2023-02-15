@@ -8,6 +8,8 @@ use std::collections::HashSet;
 use crate::constants::{Movement, HEIGHT, SCALE, WIDTH};
 use egui::Color32;
 
+pub const NUMBER_OF_SHAPES: u8 = 7;
+
 pub enum PieceShape {
     L,
     I,
@@ -58,7 +60,7 @@ impl PieceShape {
     }
 }
 
-pub fn get_piece_from_above(piece_shape: PieceShape) -> Piece {
+pub fn spawn_piece_above(piece_shape: PieceShape) -> Piece {
     match piece_shape {
         PieceShape::L => Piece {
             coords: vec![

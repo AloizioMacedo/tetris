@@ -1,8 +1,9 @@
 use egui::Color32;
+use std::collections::VecDeque;
 
 use crate::{
     constants::{Movement, Rotation, HEIGHT, SCALE, WIDTH},
-    pieces::{get_piece_from_above, Piece, PieceShape},
+    pieces::{spawn_piece_above, Piece, PieceShape, NUMBER_OF_SHAPES},
 };
 
 #[derive(Clone, Copy)]
@@ -12,6 +13,7 @@ pub struct Game {
     pub frozen_squares: Vec<ColoredPoint>,
     pub player_piece: Piece,
     pub score: i32,
+    piece_queue: VecDeque<PieceShape>,
 }
 
 pub fn new_game() -> Game {
@@ -19,8 +21,9 @@ pub fn new_game() -> Game {
 
     Game {
         frozen_squares: Vec::new(),
-        player_piece: get_piece_from_above(random_shape),
+        player_piece: spawn_piece_above(random_shape),
         score: 0,
+        piece_queue: VecDeque::from(PieceShape::generate_fair_collection(3)),
     }
 }
 
@@ -144,7 +147,6 @@ impl Game {
                 return SoftDropEnd::No;
             }
             Outcome::Stick => {
-                let new_piece: PieceShape = rand::random();
                 self.frozen_squares.extend(
                     self.player_piece
                         .coords
@@ -152,7 +154,7 @@ impl Game {
                         .map(|coord| ColoredPoint(*coord, phantom_piece.color)),
                 );
 
-                self.player_piece = get_piece_from_above(new_piece);
+                self.player_piece = self.get_next_piece();
                 return SoftDropEnd::Yes;
             }
             _ => return SoftDropEnd::No,
@@ -181,7 +183,6 @@ impl Game {
 
         match outcome {
             Outcome::Stick => {
-                let new_piece: PieceShape = rand::random();
                 self.frozen_squares.extend(
                     self.player_piece
                         .coords
@@ -190,7 +191,7 @@ impl Game {
                 );
 
                 let old_piece = self.player_piece.clone();
-                self.player_piece = get_piece_from_above(new_piece);
+                self.player_piece = self.get_next_piece();
 
                 if self.player_piece.intersect(&old_piece.coords) {
                     return Err(());
@@ -223,7 +224,6 @@ impl Game {
                         .collect(),
                 )
             {
-                let new_piece: PieceShape = rand::random();
                 self.frozen_squares.extend(
                     phantom_piece
                         .coords
@@ -231,7 +231,7 @@ impl Game {
                         .map(|coord| ColoredPoint(*coord, phantom_piece.color)),
                 );
 
-                self.player_piece = get_piece_from_above(new_piece);
+                self.player_piece = self.get_next_piece();
 
                 break;
             } else {
@@ -281,5 +281,16 @@ impl Game {
         }
 
         self.frozen_squares = new_squares;
+    }
+
+    fn get_next_piece(&mut self) -> Piece {
+        let new_piece_shape = self.piece_queue.pop_front();
+
+        if self.piece_queue.len() < (2 * NUMBER_OF_SHAPES) as usize {
+            self.piece_queue
+                .append(&mut VecDeque::from(PieceShape::generate_fair_collection(1)))
+        }
+
+        spawn_piece_above(new_piece_shape.unwrap())
     }
 }
