@@ -1,6 +1,7 @@
 use rand::{
     distributions::{Distribution, Standard},
-    Rng,
+    seq::SliceRandom,
+    thread_rng, Rng,
 };
 use std::collections::HashSet;
 
@@ -29,6 +30,31 @@ impl Distribution<PieceShape> for Standard {
             6 => PieceShape::InvertedL,
             _ => panic!(),
         }
+    }
+}
+
+impl PieceShape {
+    fn get_piece_shape_from_int(i: usize) -> Option<PieceShape> {
+        match i {
+            0 => Some(PieceShape::L),
+            1 => Some(PieceShape::I),
+            2 => Some(PieceShape::Z),
+            3 => Some(PieceShape::Square),
+            4 => Some(PieceShape::T),
+            5 => Some(PieceShape::InvertedZ),
+            6 => Some(PieceShape::InvertedL),
+            _ => None,
+        }
+    }
+
+    pub fn generate_fair_collection(n: usize) -> Vec<PieceShape> {
+        let mut possibilities = (0..=6).cycle().take(n * 7).collect::<Vec<usize>>();
+        possibilities.shuffle(&mut thread_rng());
+
+        possibilities
+            .into_iter()
+            .map(|x| PieceShape::get_piece_shape_from_int(x).unwrap())
+            .collect()
     }
 }
 
