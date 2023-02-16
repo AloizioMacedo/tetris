@@ -1,14 +1,19 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use egui::{Color32, Pos2, Rect, Stroke};
-use tetris::constants::{Movement, Rotation, FPS, HEIGHT, SCALE, WIDTH};
+use tetris::constants::{
+    Movement, Rotation, FPS, GAME_WIDTH, HEIGHT, NEXT_PIECE_DISPLAY_WIDTH, SCALE,
+};
 use tetris::game::{new_game, Game, StepKind};
 
 use std::time::{Duration, Instant};
 
 fn main() {
     let options = eframe::NativeOptions {
-        initial_window_size: Some(egui::vec2(WIDTH as f32, HEIGHT as f32)),
+        initial_window_size: Some(egui::vec2(
+            (GAME_WIDTH + NEXT_PIECE_DISPLAY_WIDTH) as f32,
+            HEIGHT as f32,
+        )),
         ..Default::default()
     };
     eframe::run_native(
@@ -144,7 +149,25 @@ fn paint_rectangle(ui: &mut egui::Ui) {
         Rect {
             min: Pos2 { x: 0., y: 0. },
             max: Pos2 {
-                x: WIDTH as f32,
+                x: GAME_WIDTH as f32,
+                y: HEIGHT as f32,
+            },
+        },
+        0.,
+        Stroke {
+            width: 1.,
+            color: Color32::GRAY,
+        },
+    );
+
+    ui.painter().rect_stroke(
+        Rect {
+            min: Pos2 {
+                x: GAME_WIDTH as f32,
+                y: 0.,
+            },
+            max: Pos2 {
+                x: (GAME_WIDTH + NEXT_PIECE_DISPLAY_WIDTH) as f32,
                 y: HEIGHT as f32,
             },
         },
@@ -189,6 +212,25 @@ impl MyApp {
                 },
                 SCALE as f32 / 5.,
                 square.1,
+            )
+        }
+
+        let next_piece = self.game.get_next_piece();
+
+        for coord in next_piece.coords {
+            ui.painter().rect_filled(
+                Rect {
+                    min: Pos2 {
+                        x: coord[0] as f32 - SCALE as f32 / 2.,
+                        y: coord[1] as f32 - SCALE as f32 / 2.,
+                    },
+                    max: Pos2 {
+                        x: coord[0] as f32 + SCALE as f32 / 2.,
+                        y: coord[1] as f32 + SCALE as f32 / 2.,
+                    },
+                },
+                SCALE as f32 / 5.,
+                next_piece.color,
             )
         }
     }

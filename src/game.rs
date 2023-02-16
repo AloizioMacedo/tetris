@@ -1,9 +1,11 @@
 use egui::Color32;
 use std::collections::VecDeque;
 
+const QUEUE_INITIAL_LENGTH: usize = 3;
+
 use crate::{
-    constants::{Movement, Rotation, HEIGHT, SCALE, WIDTH},
-    pieces::{spawn_piece_above, Piece, PieceShape, NUMBER_OF_SHAPES},
+    constants::{Movement, Rotation, GAME_WIDTH, HEIGHT, SCALE},
+    pieces::{get_next_piece_display, spawn_piece_above, Piece, PieceShape, NUMBER_OF_SHAPES},
 };
 
 #[derive(Clone, Copy)]
@@ -23,7 +25,7 @@ pub fn new_game() -> Game {
         frozen_squares: Vec::new(),
         player_piece: spawn_piece_above(random_shape),
         score: 0,
-        piece_queue: VecDeque::from(PieceShape::generate_fair_collection(3)),
+        piece_queue: VecDeque::from(PieceShape::generate_fair_collection(QUEUE_INITIAL_LENGTH)),
     }
 }
 
@@ -154,7 +156,7 @@ impl Game {
                         .map(|coord| ColoredPoint(*coord, phantom_piece.color)),
                 );
 
-                self.player_piece = self.get_next_piece();
+                self.player_piece = self.pop_next_piece();
                 return SoftDropEnd::Yes;
             }
             _ => return SoftDropEnd::No,
@@ -191,7 +193,7 @@ impl Game {
                 );
 
                 let old_piece = self.player_piece.clone();
-                self.player_piece = self.get_next_piece();
+                self.player_piece = self.pop_next_piece();
 
                 if self.player_piece.intersect(&old_piece.coords) {
                     return Err(());
@@ -231,7 +233,7 @@ impl Game {
                         .map(|coord| ColoredPoint(*coord, phantom_piece.color)),
                 );
 
-                self.player_piece = self.get_next_piece();
+                self.player_piece = self.pop_next_piece();
 
                 break;
             } else {
@@ -258,7 +260,7 @@ impl Game {
 
             let line_i = frozen_squares.filter(|tup| tup.0[1] == (SCALE * i));
 
-            if line_i.count() == ((WIDTH / SCALE) - 1) as usize {
+            if line_i.count() == ((GAME_WIDTH / SCALE) - 1) as usize {
                 full_lines_heights.push(SCALE * i);
             }
         }
@@ -283,7 +285,7 @@ impl Game {
         self.frozen_squares = new_squares;
     }
 
-    fn get_next_piece(&mut self) -> Piece {
+    fn pop_next_piece(&mut self) -> Piece {
         let new_piece_shape = self.piece_queue.pop_front();
 
         if self.piece_queue.len() < (2 * NUMBER_OF_SHAPES) as usize {
@@ -292,5 +294,11 @@ impl Game {
         }
 
         spawn_piece_above(new_piece_shape.unwrap())
+    }
+
+    pub fn get_next_piece(&self) -> Piece {
+        let next_piece_shape = *self.piece_queue.front().unwrap();
+
+        get_next_piece_display(next_piece_shape)
     }
 }

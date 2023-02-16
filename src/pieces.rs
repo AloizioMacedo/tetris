@@ -5,11 +5,12 @@ use rand::{
 };
 use std::collections::HashSet;
 
-use crate::constants::{Movement, HEIGHT, SCALE, WIDTH};
+use crate::constants::{Movement, GAME_WIDTH, HEIGHT, SCALE};
 use egui::Color32;
 
 pub const NUMBER_OF_SHAPES: u8 = 7;
 
+#[derive(Copy, Clone)]
 pub enum PieceShape {
     L,
     I,
@@ -64,72 +65,150 @@ pub fn spawn_piece_above(piece_shape: PieceShape) -> Piece {
     match piece_shape {
         PieceShape::L => Piece {
             coords: vec![
-                [WIDTH / 2, 0],
-                [WIDTH / 2, SCALE],
-                [WIDTH / 2, 2 * SCALE],
-                [WIDTH / 2 + SCALE, 2 * SCALE],
+                [GAME_WIDTH / 2, 0],
+                [GAME_WIDTH / 2, SCALE],
+                [GAME_WIDTH / 2, 2 * SCALE],
+                [GAME_WIDTH / 2 + SCALE, 2 * SCALE],
             ],
-            center: [WIDTH / 2, SCALE],
+            center: [GAME_WIDTH / 2, SCALE],
             color: Color32::from_rgb(255, 165, 0),
         },
         PieceShape::InvertedL => Piece {
             coords: vec![
-                [WIDTH / 2, 0],
-                [WIDTH / 2, SCALE],
-                [WIDTH / 2, 2 * SCALE],
-                [WIDTH / 2 - SCALE, 2 * SCALE],
+                [GAME_WIDTH / 2, 0],
+                [GAME_WIDTH / 2, SCALE],
+                [GAME_WIDTH / 2, 2 * SCALE],
+                [GAME_WIDTH / 2 - SCALE, 2 * SCALE],
             ],
-            center: [WIDTH / 2, SCALE],
+            center: [GAME_WIDTH / 2, SCALE],
             color: Color32::WHITE,
         },
         PieceShape::I => Piece {
             coords: vec![
-                [WIDTH / 2, 0],
-                [WIDTH / 2, SCALE],
-                [WIDTH / 2, 2 * SCALE],
-                [WIDTH / 2, 3 * SCALE],
+                [GAME_WIDTH / 2, 0],
+                [GAME_WIDTH / 2, SCALE],
+                [GAME_WIDTH / 2, 2 * SCALE],
+                [GAME_WIDTH / 2, 3 * SCALE],
             ],
-            center: [WIDTH / 2, 2 * SCALE],
+            center: [GAME_WIDTH / 2, 2 * SCALE],
             color: Color32::from_rgb(173, 216, 230),
         },
         PieceShape::Z => Piece {
             coords: vec![
-                [WIDTH / 2, 0],
-                [WIDTH / 2, SCALE],
-                [WIDTH / 2 + SCALE, SCALE],
-                [WIDTH / 2 + SCALE, 2 * SCALE],
+                [GAME_WIDTH / 2, 0],
+                [GAME_WIDTH / 2, SCALE],
+                [GAME_WIDTH / 2 + SCALE, SCALE],
+                [GAME_WIDTH / 2 + SCALE, 2 * SCALE],
             ],
-            center: [WIDTH / 2, SCALE],
+            center: [GAME_WIDTH / 2, SCALE],
             color: Color32::GREEN,
         },
         PieceShape::Square => Piece {
             coords: vec![
-                [WIDTH / 2, 0],
-                [WIDTH / 2, SCALE],
-                [WIDTH / 2 + SCALE, SCALE],
-                [WIDTH / 2 + SCALE, 0],
+                [GAME_WIDTH / 2, 0],
+                [GAME_WIDTH / 2, SCALE],
+                [GAME_WIDTH / 2 + SCALE, SCALE],
+                [GAME_WIDTH / 2 + SCALE, 0],
             ],
-            center: [WIDTH / 2 + SCALE / 2, SCALE / 2],
+            center: [GAME_WIDTH / 2 + SCALE / 2, SCALE / 2],
             color: Color32::from_rgb(255, 255, 102),
         },
         PieceShape::T => Piece {
             coords: vec![
-                [WIDTH / 2 - SCALE, 0],
-                [WIDTH / 2, 0],
-                [WIDTH / 2 + SCALE, 0],
-                [WIDTH / 2, SCALE],
+                [GAME_WIDTH / 2 - SCALE, 0],
+                [GAME_WIDTH / 2, 0],
+                [GAME_WIDTH / 2 + SCALE, 0],
+                [GAME_WIDTH / 2, SCALE],
             ],
-            center: [WIDTH / 2, 0],
+            center: [GAME_WIDTH / 2, 0],
             color: Color32::from_rgb(255, 20, 147),
         },
         PieceShape::InvertedZ => Piece {
             coords: vec![
-                [WIDTH / 2 + SCALE, 0],
-                [WIDTH / 2 + SCALE, SCALE],
-                [WIDTH / 2, SCALE],
-                [WIDTH / 2, 2 * SCALE],
+                [GAME_WIDTH / 2 + SCALE, 0],
+                [GAME_WIDTH / 2 + SCALE, SCALE],
+                [GAME_WIDTH / 2, SCALE],
+                [GAME_WIDTH / 2, 2 * SCALE],
             ],
-            center: [WIDTH / 2, SCALE],
+            center: [GAME_WIDTH / 2, SCALE],
+            color: Color32::RED,
+        },
+    }
+}
+
+pub fn get_next_piece_display(piece_shape: PieceShape) -> Piece {
+    const REF_Y: i32 = 80;
+    const REF_X: i32 = 100;
+
+    match piece_shape {
+        PieceShape::L => Piece {
+            coords: vec![
+                [GAME_WIDTH + REF_X, REF_Y],
+                [GAME_WIDTH + REF_X, REF_Y + SCALE],
+                [GAME_WIDTH + REF_X, REF_Y + 2 * SCALE],
+                [GAME_WIDTH + REF_X + SCALE, REF_Y + 2 * SCALE],
+            ],
+            center: [GAME_WIDTH / 2, SCALE],
+            color: Color32::from_rgb(255, 165, 0),
+        },
+        PieceShape::InvertedL => Piece {
+            coords: vec![
+                [GAME_WIDTH + REF_X + SCALE, REF_Y],
+                [GAME_WIDTH + REF_X + SCALE, REF_Y + SCALE],
+                [GAME_WIDTH + REF_X + SCALE, REF_Y + 2 * SCALE],
+                [GAME_WIDTH + REF_X + SCALE - SCALE, REF_Y + 2 * SCALE],
+            ],
+            center: [GAME_WIDTH / 2, SCALE],
+            color: Color32::WHITE,
+        },
+        PieceShape::I => Piece {
+            coords: vec![
+                [GAME_WIDTH + REF_X, REF_Y + 0],
+                [GAME_WIDTH + REF_X, REF_Y + SCALE],
+                [GAME_WIDTH + REF_X, REF_Y + 2 * SCALE],
+                [GAME_WIDTH + REF_X, REF_Y + 3 * SCALE],
+            ],
+            center: [GAME_WIDTH / 2, 2 * SCALE],
+            color: Color32::from_rgb(173, 216, 230),
+        },
+        PieceShape::Z => Piece {
+            coords: vec![
+                [GAME_WIDTH + REF_X, REF_Y + 0],
+                [GAME_WIDTH + REF_X, REF_Y + SCALE],
+                [GAME_WIDTH + REF_X + SCALE, REF_Y + SCALE],
+                [GAME_WIDTH + REF_X + SCALE, REF_Y + 2 * SCALE],
+            ],
+            center: [GAME_WIDTH / 2, SCALE],
+            color: Color32::GREEN,
+        },
+        PieceShape::Square => Piece {
+            coords: vec![
+                [GAME_WIDTH + REF_X, REF_Y],
+                [GAME_WIDTH + REF_X, REF_Y + SCALE],
+                [GAME_WIDTH + REF_X + SCALE, REF_Y + SCALE],
+                [GAME_WIDTH + REF_X + SCALE, REF_Y],
+            ],
+            center: [GAME_WIDTH / 2 + SCALE / 2, SCALE / 2],
+            color: Color32::from_rgb(255, 255, 102),
+        },
+        PieceShape::T => Piece {
+            coords: vec![
+                [GAME_WIDTH + REF_X + SCALE, REF_Y],
+                [GAME_WIDTH + REF_X + SCALE, REF_Y + SCALE],
+                [GAME_WIDTH + REF_X + SCALE, REF_Y + 2 * SCALE],
+                [GAME_WIDTH + REF_X, REF_Y + SCALE],
+            ],
+            center: [GAME_WIDTH / 2, 0],
+            color: Color32::from_rgb(255, 20, 147),
+        },
+        PieceShape::InvertedZ => Piece {
+            coords: vec![
+                [GAME_WIDTH + REF_X + SCALE, REF_Y],
+                [GAME_WIDTH + REF_X + SCALE, REF_Y + SCALE],
+                [GAME_WIDTH + REF_X, REF_Y + SCALE],
+                [GAME_WIDTH + REF_X, REF_Y + 2 * SCALE],
+            ],
+            center: [GAME_WIDTH / 2, SCALE],
             color: Color32::RED,
         },
     }
@@ -230,7 +309,7 @@ impl Piece {
     }
     pub fn hits_sides(&self) -> bool {
         for coord in self.coords.clone() {
-            if coord[0] >= WIDTH || coord[0] <= 0 {
+            if coord[0] >= GAME_WIDTH || coord[0] <= 0 {
                 return true;
             }
         }
