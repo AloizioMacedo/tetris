@@ -81,13 +81,21 @@ impl Game {
     fn rotate_piece(&mut self, rotation: Rotation) {
         let mut phantom_piece = self.player_piece.clone();
 
-        let mut outcome: Outcome = Outcome::Free;
-
         match rotation {
             Rotation::CCW => phantom_piece.rotate_ccw(),
             Rotation::CW => phantom_piece.rotate_cw(),
         };
 
+        self.get_rotation_result(&phantom_piece);
+
+        if let Some(piece) = self.get_rotation_result(&phantom_piece) {
+            self.player_piece = piece;
+        } else {
+            ()
+        }
+    }
+
+    fn get_rotation_result(&self, phantom_piece: &Piece) -> Option<Piece> {
         if phantom_piece.intersect(
             &self
                 .frozen_squares
@@ -95,20 +103,13 @@ impl Game {
                 .map(|colored_point| colored_point.0)
                 .collect(),
         ) {
-            outcome = Outcome::Stick;
-        }
-
-        if phantom_piece.hits_sides() {
-            outcome = Outcome::DoNothing;
-        }
-
-        if phantom_piece.hits_bottom() {
-            outcome = Outcome::DoNothing
-        }
-
-        match outcome {
-            Outcome::Free => self.player_piece = phantom_piece,
-            _ => (),
+            None
+        } else if phantom_piece.hits_sides() {
+            None
+        } else if phantom_piece.hits_bottom() {
+            None
+        } else {
+            Some(phantom_piece.to_owned())
         }
     }
 
