@@ -316,4 +316,19 @@ impl Piece {
 
         return false;
     }
+
+    pub fn kick(&self, vector: [i32; 2]) -> Piece {
+        let new_coords = self
+            .coords
+            .iter()
+            .map(|arr| [arr[0] + vector[0], arr[1] + vector[1]])
+            .collect();
+
+        let new_center = [self.center[0] + vector[0], self.center[0] + vector[1]];
+        Piece {
+            coords: new_coords,
+            center: new_center,
+            color: self.color,
+        }
+    }
 }
