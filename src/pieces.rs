@@ -37,7 +37,7 @@ impl Distribution<PieceShape> for Standard {
 }
 
 impl PieceShape {
-    fn get_piece_shape_from_int(i: usize) -> Option<PieceShape> {
+    fn from(i: usize) -> Option<PieceShape> {
         match i {
             0 => Some(PieceShape::L),
             1 => Some(PieceShape::I),
@@ -56,7 +56,7 @@ impl PieceShape {
 
         possibilities
             .into_iter()
-            .map(|x| PieceShape::get_piece_shape_from_int(x).unwrap())
+            .map(|x| PieceShape::from(x).unwrap())
             .collect()
     }
 }
