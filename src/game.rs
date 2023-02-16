@@ -260,7 +260,7 @@ impl Game {
 
             let line_i = frozen_squares.filter(|tup| tup.0[1] == (SCALE * i));
 
-            if line_i.count() == ((GAME_WIDTH / SCALE) - 1) as usize {
+            if line_i.count() == (GAME_WIDTH / SCALE) as usize {
                 full_lines_heights.push(SCALE * i);
             }
         }
