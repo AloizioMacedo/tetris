@@ -24,10 +24,10 @@ fn main() {
 }
 
 #[derive(Copy, Clone)]
-enum Command<T, R> {
+enum Command {
     NoCommand,
-    Movement(T),
-    Rotation(R),
+    Movement(Movement),
+    Rotation(Rotation),
     DropDown,
 }
 
@@ -35,7 +35,8 @@ struct MyApp {
     game: Game,
     time: Instant,
     fine_grained_time: Instant,
-    current_move_command: Command<Movement, Rotation>,
+    current_move_command: Command,
+    current_rotation_command: Command,
     is_paused: bool,
     game_over: bool,
 }
@@ -48,6 +49,7 @@ impl Default for MyApp {
             time: now,
             fine_grained_time: now,
             current_move_command: Command::NoCommand,
+            current_rotation_command: Command::NoCommand,
             is_paused: false,
             game_over: false,
         }
@@ -90,8 +92,27 @@ impl eframe::App for MyApp {
                         key,
                         pressed,
                         modifiers: _,
-                    } => self.get_command(pressed, key),
+                    } => match self.get_command(pressed, key) {
+                        Command::Movement(x) => Command::Movement(x),
+                        Command::DropDown => Command::DropDown,
+                        _ => self.current_move_command,
+                    },
                     _ => self.current_move_command,
+                };
+
+                self.current_rotation_command = match event {
+                    egui::Event::Key {
+                        key,
+                        pressed,
+                        modifiers: _,
+                    } => {
+                        if let Command::Rotation(x) = self.get_command(pressed, key) {
+                            Command::Rotation(x)
+                        } else {
+                            self.current_rotation_command
+                        }
+                    }
+                    _ => self.current_rotation_command,
                 }
             }
 
@@ -117,14 +138,18 @@ impl eframe::App for MyApp {
                     Command::Movement(movement) => {
                         self.game.step(StepKind::Move(Some(movement))).unwrap()
                     }
+                    Command::DropDown => self.game.step(StepKind::HardDrop).unwrap(),
+                    _ => (),
+                }
+                match self.current_rotation_command {
                     Command::Rotation(rotation) => {
                         self.game.step(StepKind::Rotate(rotation)).unwrap()
                     }
-                    Command::DropDown => self.game.step(StepKind::HardDrop).unwrap(),
                     _ => (),
                 }
                 self.fine_grained_time = time_now;
                 self.current_move_command = Command::NoCommand;
+                self.current_rotation_command = Command::NoCommand;
             }
 
             if delta_t >= Duration::from_millis((2500. * (1. / FPS)) as u64) {
@@ -137,6 +162,7 @@ impl eframe::App for MyApp {
 
                 self.time = time_now;
                 self.current_move_command = Command::NoCommand;
+                self.current_rotation_command = Command::NoCommand;
             }
         });
 
@@ -180,7 +206,7 @@ fn paint_rectangle(ui: &mut egui::Ui) {
 }
 
 impl MyApp {
-    fn get_command(&self, pressed: &bool, key: &egui::Key) -> Command<Movement, Rotation> {
+    fn get_command(&self, pressed: &bool, key: &egui::Key) -> Command {
         if *pressed {
             match key {
                 egui::Key::ArrowUp => Command::Movement(Movement::UP),
