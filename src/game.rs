@@ -290,7 +290,7 @@ impl Game {
 
         if self.piece_queue.len() < (2 * NUMBER_OF_SHAPES) as usize {
             self.piece_queue
-                .append(&mut VecDeque::from(PieceShape::generate_fair_collection(1)))
+                .append(&mut VecDeque::from(PieceShape::generate_fair_collection(3)))
         }
 
         spawn_piece_above(new_piece_shape.unwrap())
