@@ -69,51 +69,11 @@ impl eframe::App for MyApp {
             let events = ui.input().events.clone();
 
             for event in &events {
-                self.is_paused = match event {
-                    egui::Event::Key {
-                        key,
-                        pressed,
-                        modifiers: _,
-                    } => match key {
-                        egui::Key::Space => {
-                            if *pressed {
-                                !self.is_paused
-                            } else {
-                                self.is_paused
-                            }
-                        }
-                        _ => self.is_paused,
-                    },
-                    _ => self.is_paused,
-                };
+                self.set_pause_or_unpause(event);
 
-                self.current_move_command = match event {
-                    egui::Event::Key {
-                        key,
-                        pressed,
-                        modifiers: _,
-                    } => match self.get_command(pressed, key) {
-                        Command::Movement(x) => Command::Movement(x),
-                        Command::DropDown => Command::DropDown,
-                        _ => self.current_move_command,
-                    },
-                    _ => self.current_move_command,
-                };
+                self.set_move_command(event);
 
-                self.current_rotation_command = match event {
-                    egui::Event::Key {
-                        key,
-                        pressed,
-                        modifiers: _,
-                    } => {
-                        if let Command::Rotation(x) = self.get_command(pressed, key) {
-                            Command::Rotation(x)
-                        } else {
-                            self.current_rotation_command
-                        }
-                    }
-                    _ => self.current_rotation_command,
-                }
+                self.set_rotation_command(event);
             }
 
             paint_rectangle(ui);
@@ -134,22 +94,7 @@ impl eframe::App for MyApp {
             let fine_grained_delta_t = time_now.duration_since(self.fine_grained_time);
 
             if fine_grained_delta_t >= Duration::from_millis((10. * (1. / FPS)) as u64) {
-                match self.current_move_command {
-                    Command::Movement(movement) => {
-                        self.game.step(StepKind::Move(Some(movement))).unwrap()
-                    }
-                    Command::DropDown => self.game.step(StepKind::HardDrop).unwrap(),
-                    _ => (),
-                }
-                match self.current_rotation_command {
-                    Command::Rotation(rotation) => {
-                        self.game.step(StepKind::Rotate(rotation)).unwrap()
-                    }
-                    _ => (),
-                }
-                self.fine_grained_time = time_now;
-                self.current_move_command = Command::NoCommand;
-                self.current_rotation_command = Command::NoCommand;
+                self.process_move_command(time_now);
             }
 
             if delta_t >= Duration::from_millis((2500. * (1. / FPS)) as u64) {
@@ -303,5 +248,72 @@ impl MyApp {
                 },
             )
         }
+    }
+
+    fn set_pause_or_unpause(&mut self, event: &egui::Event) {
+        self.is_paused = match event {
+            egui::Event::Key {
+                key,
+                pressed,
+                modifiers: _,
+            } => match key {
+                egui::Key::Space => {
+                    if *pressed {
+                        !self.is_paused
+                    } else {
+                        self.is_paused
+                    }
+                }
+                _ => self.is_paused,
+            },
+            _ => self.is_paused,
+        }
+    }
+
+    fn set_move_command(&mut self, event: &egui::Event) {
+        self.current_move_command = match event {
+            egui::Event::Key {
+                key,
+                pressed,
+                modifiers: _,
+            } => match self.get_command(pressed, key) {
+                Command::Movement(x) => Command::Movement(x),
+                Command::DropDown => Command::DropDown,
+                _ => self.current_move_command,
+            },
+            _ => self.current_move_command,
+        };
+    }
+
+    fn set_rotation_command(&mut self, event: &egui::Event) {
+        self.current_rotation_command = match event {
+            egui::Event::Key {
+                key,
+                pressed,
+                modifiers: _,
+            } => {
+                if let Command::Rotation(x) = self.get_command(pressed, key) {
+                    Command::Rotation(x)
+                } else {
+                    self.current_rotation_command
+                }
+            }
+            _ => self.current_rotation_command,
+        }
+    }
+
+    fn process_move_command(&mut self, time_now: Instant) {
+        match self.current_move_command {
+            Command::Movement(movement) => self.game.step(StepKind::Move(Some(movement))).unwrap(),
+            Command::DropDown => self.game.step(StepKind::HardDrop).unwrap(),
+            _ => (),
+        }
+        match self.current_rotation_command {
+            Command::Rotation(rotation) => self.game.step(StepKind::Rotate(rotation)).unwrap(),
+            _ => (),
+        }
+        self.fine_grained_time = time_now;
+        self.current_move_command = Command::NoCommand;
+        self.current_rotation_command = Command::NoCommand;
     }
 }
