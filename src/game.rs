@@ -1,5 +1,6 @@
 use egui::Color32;
 use std::collections::VecDeque;
+use std::fmt;
 
 const QUEUE_INITIAL_LENGTH: usize = 3;
 
@@ -48,7 +49,10 @@ enum SoftDropEnd {
 }
 
 impl Game {
-    pub fn step(&mut self, step_kind: StepKind<Option<Movement>, Rotation>) -> Result<(), ()> {
+    pub fn step(
+        &mut self,
+        step_kind: StepKind<Option<Movement>, Rotation>,
+    ) -> Result<(), EndOfGame> {
         match step_kind {
             StepKind::GoDown => self.force_piece_down_or_stick()?,
             StepKind::Move(movement) => {
@@ -90,8 +94,6 @@ impl Game {
 
         if let Some(piece) = self.get_rotation_result(&phantom_piece) {
             self.player_piece = piece;
-        } else {
-            ()
         }
     }
 
@@ -164,7 +166,7 @@ impl Game {
         }
     }
 
-    fn force_piece_down_or_stick(&mut self) -> Result<(), ()> {
+    fn force_piece_down_or_stick(&mut self) -> Result<(), EndOfGame> {
         let mut phantom_piece = self.player_piece.clone();
         let mut outcome: Outcome = Outcome::Free;
 
@@ -197,7 +199,7 @@ impl Game {
                 self.player_piece = self.pop_next_piece();
 
                 if self.player_piece.intersect(&old_piece.coords) {
-                    return Err(());
+                    return Err(EndOfGame);
                 }
             }
             Outcome::Free => {
@@ -302,4 +304,19 @@ impl Game {
 
         get_next_piece_display(next_piece_shape)
     }
+}
+
+#[derive(Debug)]
+pub struct EndOfGame;
+
+impl fmt::Display for EndOfGame {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Game over.")
+    }
+}
+
+impl std::error::Error for EndOfGame {}
+
+pub fn read_u8() -> Result<u8, EndOfGame> {
+    Err(EndOfGame)
 }

@@ -4,7 +4,7 @@ use egui::{Color32, Pos2, Rect, Stroke};
 use tetris::constants::{
     Movement, Rotation, FPS, GAME_WIDTH, HEIGHT, NEXT_PIECE_DISPLAY_WIDTH, SCALE,
 };
-use tetris::game::{new_game, Game, StepKind};
+use tetris::game::{new_game, EndOfGame, Game, StepKind};
 
 use std::time::{Duration, Instant};
 
@@ -102,7 +102,7 @@ impl eframe::App for MyApp {
 
                 match game_still_on {
                     Ok(()) => self.game_over = false,
-                    Err(()) => self.game_over = true,
+                    Err(EndOfGame) => self.game_over = true,
                 }
 
                 self.time = time_now;
