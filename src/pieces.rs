@@ -37,6 +37,65 @@ impl Distribution<PieceShape> for Standard {
 }
 
 impl PieceShape {
+    pub fn get_kicks(&self) -> Vec<[i32; 2]> {
+        match self {
+            PieceShape::L => vec![
+                [0, 0],
+                [SCALE, 0],
+                [-SCALE, 0],
+                [0, -SCALE],
+                [-SCALE, -SCALE],
+                [SCALE, -SCALE],
+            ],
+            PieceShape::I => vec![
+                [0, 0],
+                [SCALE, 0],
+                [-SCALE, 0],
+                [2 * SCALE, 0],
+                [-2 * SCALE, 0],
+                [0, -SCALE],
+                [-SCALE, -SCALE],
+                [SCALE, -SCALE],
+                [0, -SCALE],
+                [-SCALE, -2 * SCALE],
+                [SCALE, -2 * SCALE],
+            ],
+            PieceShape::Z => vec![
+                [0, 0],
+                [SCALE, 0],
+                [-SCALE, 0],
+                [0, -SCALE],
+                [-SCALE, -SCALE],
+                [SCALE, -SCALE],
+            ],
+            PieceShape::Square => vec![[0, 0]],
+            PieceShape::T => vec![
+                [0, 0],
+                [SCALE, 0],
+                [-SCALE, 0],
+                [0, -SCALE],
+                [-SCALE, -SCALE],
+                [SCALE, -SCALE],
+            ],
+            PieceShape::InvertedZ => vec![
+                [0, 0],
+                [SCALE, 0],
+                [-SCALE, 0],
+                [0, -SCALE],
+                [-SCALE, -SCALE],
+                [SCALE, -SCALE],
+            ],
+            PieceShape::InvertedL => vec![
+                [0, 0],
+                [SCALE, 0],
+                [-SCALE, 0],
+                [0, -SCALE],
+                [-SCALE, -SCALE],
+                [SCALE, -SCALE],
+            ],
+        }
+    }
+
     fn from(i: usize) -> Option<PieceShape> {
         match i {
             0 => Some(PieceShape::L),
@@ -72,6 +131,7 @@ pub fn spawn_piece_above(piece_shape: PieceShape) -> Piece {
             ],
             center: [GAME_WIDTH / 2 - SCALE / 2, SCALE],
             color: Color32::from_rgb(255, 165, 0),
+            piece_shape: PieceShape::L,
         },
         PieceShape::InvertedL => Piece {
             coords: vec![
@@ -82,6 +142,7 @@ pub fn spawn_piece_above(piece_shape: PieceShape) -> Piece {
             ],
             center: [GAME_WIDTH / 2 - SCALE / 2, SCALE],
             color: Color32::WHITE,
+            piece_shape: PieceShape::InvertedL,
         },
         PieceShape::I => Piece {
             coords: vec![
@@ -92,6 +153,7 @@ pub fn spawn_piece_above(piece_shape: PieceShape) -> Piece {
             ],
             center: [GAME_WIDTH / 2 - SCALE / 2, 2 * SCALE],
             color: Color32::from_rgb(173, 216, 230),
+            piece_shape: PieceShape::I,
         },
         PieceShape::Z => Piece {
             coords: vec![
@@ -102,6 +164,7 @@ pub fn spawn_piece_above(piece_shape: PieceShape) -> Piece {
             ],
             center: [GAME_WIDTH / 2 - SCALE / 2, SCALE],
             color: Color32::GREEN,
+            piece_shape: PieceShape::Z,
         },
         PieceShape::Square => Piece {
             coords: vec![
@@ -112,6 +175,7 @@ pub fn spawn_piece_above(piece_shape: PieceShape) -> Piece {
             ],
             center: [GAME_WIDTH / 2, SCALE / 2],
             color: Color32::from_rgb(255, 255, 102),
+            piece_shape: PieceShape::Square,
         },
         PieceShape::T => Piece {
             coords: vec![
@@ -122,6 +186,7 @@ pub fn spawn_piece_above(piece_shape: PieceShape) -> Piece {
             ],
             center: [GAME_WIDTH / 2 - SCALE / 2, 0],
             color: Color32::from_rgb(255, 20, 147),
+            piece_shape: PieceShape::T,
         },
         PieceShape::InvertedZ => Piece {
             coords: vec![
@@ -132,6 +197,7 @@ pub fn spawn_piece_above(piece_shape: PieceShape) -> Piece {
             ],
             center: [GAME_WIDTH / 2 - SCALE / 2, SCALE],
             color: Color32::RED,
+            piece_shape: PieceShape::InvertedZ,
         },
     }
 }
@@ -150,6 +216,7 @@ pub fn get_next_piece_display(piece_shape: PieceShape) -> Piece {
             ],
             center: [GAME_WIDTH / 2, SCALE],
             color: Color32::from_rgb(255, 165, 0),
+            piece_shape: PieceShape::L,
         },
         PieceShape::InvertedL => Piece {
             coords: vec![
@@ -160,6 +227,7 @@ pub fn get_next_piece_display(piece_shape: PieceShape) -> Piece {
             ],
             center: [GAME_WIDTH / 2, SCALE],
             color: Color32::WHITE,
+            piece_shape: PieceShape::InvertedL,
         },
         PieceShape::I => Piece {
             coords: vec![
@@ -170,6 +238,7 @@ pub fn get_next_piece_display(piece_shape: PieceShape) -> Piece {
             ],
             center: [GAME_WIDTH / 2, 2 * SCALE],
             color: Color32::from_rgb(173, 216, 230),
+            piece_shape: PieceShape::I,
         },
         PieceShape::Z => Piece {
             coords: vec![
@@ -180,6 +249,7 @@ pub fn get_next_piece_display(piece_shape: PieceShape) -> Piece {
             ],
             center: [GAME_WIDTH / 2, SCALE],
             color: Color32::GREEN,
+            piece_shape: PieceShape::Z,
         },
         PieceShape::Square => Piece {
             coords: vec![
@@ -190,6 +260,7 @@ pub fn get_next_piece_display(piece_shape: PieceShape) -> Piece {
             ],
             center: [GAME_WIDTH / 2 + SCALE / 2, SCALE / 2],
             color: Color32::from_rgb(255, 255, 102),
+            piece_shape: PieceShape::Square,
         },
         PieceShape::T => Piece {
             coords: vec![
@@ -200,6 +271,7 @@ pub fn get_next_piece_display(piece_shape: PieceShape) -> Piece {
             ],
             center: [GAME_WIDTH / 2, 0],
             color: Color32::from_rgb(255, 20, 147),
+            piece_shape: PieceShape::T,
         },
         PieceShape::InvertedZ => Piece {
             coords: vec![
@@ -210,6 +282,7 @@ pub fn get_next_piece_display(piece_shape: PieceShape) -> Piece {
             ],
             center: [GAME_WIDTH / 2, SCALE],
             color: Color32::RED,
+            piece_shape: PieceShape::InvertedZ,
         },
     }
 }
@@ -219,6 +292,7 @@ pub struct Piece {
     pub coords: Vec<[i32; 2]>,
     pub center: [i32; 2],
     pub color: Color32,
+    pub piece_shape: PieceShape,
 }
 
 impl Piece {
@@ -324,11 +398,12 @@ impl Piece {
             .map(|arr| [arr[0] + vector[0], arr[1] + vector[1]])
             .collect();
 
-        let new_center = [self.center[0] + vector[0], self.center[0] + vector[1]];
+        let new_center = [self.center[0] + vector[0], self.center[1] + vector[1]];
         Piece {
             coords: new_coords,
             center: new_center,
             color: self.color,
+            piece_shape: self.piece_shape,
         }
     }
 }

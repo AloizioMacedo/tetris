@@ -95,19 +95,25 @@ impl Game {
     }
 
     fn get_rotation_result(&self, phantom_piece: &Piece) -> Option<Piece> {
-        if phantom_piece.intersect(
-            &self
-                .frozen_squares
-                .iter()
-                .map(|colored_point| colored_point.0)
-                .collect(),
-        ) || phantom_piece.hits_sides()
-            || phantom_piece.hits_bottom()
-        {
-            None
-        } else {
-            Some(phantom_piece.to_owned())
+        for kick in phantom_piece.piece_shape.get_kicks() {
+            let phantom_piece = phantom_piece.kick(kick);
+
+            if phantom_piece.intersect(
+                &self
+                    .frozen_squares
+                    .iter()
+                    .map(|colored_point| colored_point.0)
+                    .collect(),
+            ) || phantom_piece.hits_sides()
+                || phantom_piece.hits_bottom()
+            {
+                continue;
+            } else {
+                return Some(phantom_piece.to_owned());
+            }
         }
+
+        None
     }
 
     fn move_piece(&mut self, movement: Option<Movement>) -> SoftDropEnd {
