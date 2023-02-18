@@ -96,20 +96,20 @@ impl Game {
 
     fn get_rotation_result(&self, phantom_piece: &Piece) -> Option<Piece> {
         for kick in phantom_piece.piece_shape.get_kicks() {
-            let phantom_piece = phantom_piece.kick(kick);
+            let kicked_piece = phantom_piece.kick(kick);
 
-            if phantom_piece.intersect(
+            if kicked_piece.intersect(
                 &self
                     .frozen_squares
                     .iter()
                     .map(|colored_point| colored_point.0)
                     .collect(),
-            ) || phantom_piece.hits_sides()
-                || phantom_piece.hits_bottom()
+            ) || kicked_piece.hits_sides()
+                || kicked_piece.hits_bottom()
             {
                 continue;
             } else {
-                return Some(phantom_piece.to_owned());
+                return Some(kicked_piece);
             }
         }
 
