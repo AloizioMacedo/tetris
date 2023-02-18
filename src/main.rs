@@ -16,16 +16,12 @@ fn main() {
         )),
         ..Default::default()
     };
-    eframe::run_native(
-        "Tetris",
-        options,
-        Box::new(|_cc| Box::new(MyApp::default())),
-    )
+    eframe::run_native("Tetris", options, Box::new(|_cc| Box::<MyApp>::default()))
 }
 
 #[derive(Copy, Clone)]
 enum Command {
-    NoCommand,
+    None,
     Movement(Movement),
     Rotation(Rotation),
     DropDown,
@@ -48,8 +44,8 @@ impl Default for MyApp {
             game: new_game(),
             time: now,
             fine_grained_time: now,
-            current_move_command: Command::NoCommand,
-            current_rotation_command: Command::NoCommand,
+            current_move_command: Command::None,
+            current_rotation_command: Command::None,
             is_paused: false,
             game_over: false,
         }
@@ -106,8 +102,8 @@ impl eframe::App for MyApp {
                 }
 
                 self.time = time_now;
-                self.current_move_command = Command::NoCommand;
-                self.current_rotation_command = Command::NoCommand;
+                self.current_move_command = Command::None;
+                self.current_rotation_command = Command::None;
             }
         });
 
@@ -253,19 +249,16 @@ impl MyApp {
     fn set_pause_or_unpause(&mut self, event: &egui::Event) {
         self.is_paused = match event {
             egui::Event::Key {
-                key,
+                key: egui::Key::Space,
                 pressed,
                 modifiers: _,
-            } => match key {
-                egui::Key::Space => {
-                    if *pressed {
-                        !self.is_paused
-                    } else {
-                        self.is_paused
-                    }
+            } => {
+                if *pressed {
+                    !self.is_paused
+                } else {
+                    self.is_paused
                 }
-                _ => self.is_paused,
-            },
+            }
             _ => self.is_paused,
         }
     }
@@ -308,12 +301,11 @@ impl MyApp {
             Command::DropDown => self.game.step(StepKind::HardDrop).unwrap(),
             _ => (),
         }
-        match self.current_rotation_command {
-            Command::Rotation(rotation) => self.game.step(StepKind::Rotate(rotation)).unwrap(),
-            _ => (),
+        if let Command::Rotation(rotation) = self.current_rotation_command {
+            self.game.step(StepKind::Rotate(rotation)).unwrap()
         }
         self.fine_grained_time = time_now;
-        self.current_move_command = Command::NoCommand;
-        self.current_rotation_command = Command::NoCommand;
+        self.current_move_command = Command::None;
+        self.current_rotation_command = Command::None;
     }
 }

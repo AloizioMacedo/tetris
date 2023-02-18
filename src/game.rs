@@ -57,16 +57,13 @@ impl Game {
             StepKind::GoDown => self.force_piece_down_or_stick()?,
             StepKind::Move(movement) => {
                 let is_soft_drop_end = self.move_piece(movement);
-                match is_soft_drop_end {
-                    SoftDropEnd::Yes => {
-                        self.score += self.player_piece.coords.iter().count() as i32
-                    }
-                    _ => (),
+                if let SoftDropEnd::Yes = is_soft_drop_end {
+                    self.score += self.player_piece.coords.len() as i32
                 }
             }
             StepKind::Rotate(rotation) => self.rotate_piece(rotation),
             StepKind::HardDrop => {
-                self.score += 2 * self.player_piece.coords.iter().count() as i32;
+                self.score += 2 * self.player_piece.coords.len() as i32;
                 self.drop_down()
             }
         }
@@ -74,7 +71,7 @@ impl Game {
         let full_lines_heights = self.get_full_lines_heights();
 
         if !full_lines_heights.is_empty() {
-            let n = full_lines_heights.iter().count() as i32;
+            let n = full_lines_heights.len() as i32;
             self.score += n.pow(2) * 100;
             self.erase_lines(full_lines_heights);
         };
@@ -104,11 +101,9 @@ impl Game {
                 .iter()
                 .map(|colored_point| colored_point.0)
                 .collect(),
-        ) {
-            None
-        } else if phantom_piece.hits_sides() {
-            None
-        } else if phantom_piece.hits_bottom() {
+        ) || phantom_piece.hits_sides()
+            || phantom_piece.hits_bottom()
+        {
             None
         } else {
             Some(phantom_piece.to_owned())
@@ -134,10 +129,7 @@ impl Game {
                 .collect(),
         ) {
             match movement {
-                Some(movement) => match movement {
-                    Movement::DOWN => outcome = Outcome::Stick,
-                    _ => outcome = Outcome::DoNothing,
-                },
+                Some(Movement::DOWN) => outcome = Outcome::Stick,
                 _ => outcome = Outcome::DoNothing,
             }
         }
@@ -149,7 +141,8 @@ impl Game {
         match outcome {
             Outcome::Free => {
                 self.player_piece = phantom_piece;
-                return SoftDropEnd::No;
+
+                SoftDropEnd::No
             }
             Outcome::Stick => {
                 self.frozen_squares.extend(
@@ -160,9 +153,10 @@ impl Game {
                 );
 
                 self.player_piece = self.pop_next_piece();
-                return SoftDropEnd::Yes;
+
+                SoftDropEnd::Yes
             }
-            _ => return SoftDropEnd::No,
+            _ => SoftDropEnd::No,
         }
     }
 
@@ -210,7 +204,7 @@ impl Game {
             }
         }
 
-        return Ok(());
+        Ok(())
     }
 
     fn drop_down(&mut self) {

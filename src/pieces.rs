@@ -163,7 +163,7 @@ pub fn get_next_piece_display(piece_shape: PieceShape) -> Piece {
         },
         PieceShape::I => Piece {
             coords: vec![
-                [GAME_WIDTH + REF_X, REF_Y + 0],
+                [GAME_WIDTH + REF_X, REF_Y],
                 [GAME_WIDTH + REF_X, REF_Y + SCALE],
                 [GAME_WIDTH + REF_X, REF_Y + 2 * SCALE],
                 [GAME_WIDTH + REF_X, REF_Y + 3 * SCALE],
@@ -173,7 +173,7 @@ pub fn get_next_piece_display(piece_shape: PieceShape) -> Piece {
         },
         PieceShape::Z => Piece {
             coords: vec![
-                [GAME_WIDTH + REF_X, REF_Y + 0],
+                [GAME_WIDTH + REF_X, REF_Y],
                 [GAME_WIDTH + REF_X, REF_Y + SCALE],
                 [GAME_WIDTH + REF_X + SCALE, REF_Y + SCALE],
                 [GAME_WIDTH + REF_X + SCALE, REF_Y + 2 * SCALE],
@@ -305,7 +305,7 @@ impl Piece {
             }
         }
 
-        return false;
+        false
     }
     pub fn hits_sides(&self) -> bool {
         for coord in self.coords.clone() {
@@ -314,7 +314,7 @@ impl Piece {
             }
         }
 
-        return false;
+        false
     }
 
     pub fn kick(&self, vector: [i32; 2]) -> Piece {
