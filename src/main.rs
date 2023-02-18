@@ -164,7 +164,7 @@ impl MyApp {
         }
     }
 
-    fn paint_pieces(&mut self, ui: &mut egui::Ui) {
+    fn paint_pieces(&self, ui: &mut egui::Ui) {
         for square in self.game.list_squares() {
             ui.painter().rect_filled(
                 Rect {
@@ -202,7 +202,7 @@ impl MyApp {
         }
     }
 
-    fn paint_projection(&mut self, ui: &mut egui::Ui) {
+    fn paint_projection(&self, ui: &mut egui::Ui) {
         let mut phantom_piece = self.game.player_piece.clone();
 
         loop {
