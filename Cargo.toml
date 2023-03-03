@@ -1,10 +1,15 @@
 [package]
 name = "tetris_gui"
 version = "0.1.0"
+description = "Rust implementation of Tetris using egui."
+repository = "https://github.com/AloizioMacedo/tetris"
 authors = ["Aloizio Macedo"]
-keywords = ["gamedev", "tetris"]
-license = "MIT OR Apache-2.0"
+keywords = ["gamedev", "tetris", "egui"]
+license = "MIT"
 edition = "2021"
+readme = "README.md"
+categories = ["game-development", "games"]
+exclude = ["target", "Cargo.lock"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
