@@ -1,8 +1,8 @@
 # Introduction
 
-This is an implementation of the popular [Tetris](https://en.wikipedia.org/wiki/Tetris) game using [egui](https://github.com/emilk/egui) for the graphical interface.
+This is an implementation of some of the rules of the popular [Tetris](https://en.wikipedia.org/wiki/Tetris) game using [egui](https://github.com/emilk/egui) for the graphical interface, done for education purposes.
 
-<img src="tetris.png" alt="MarineGEO circle logo" style="height: 400px; width:300px; display: block; margin-left: auto; margin-right: auto"/>
+<img src="quattorix.png" alt="MarineGEO circle logo" style="height: 400px; width:300px; display: block; margin-left: auto; margin-right: auto"/>
 
 ## Installation and how to run
 

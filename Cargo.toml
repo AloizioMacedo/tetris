@@ -1,6 +1,6 @@
 [package]
 name = "tetris_gui"
-version = "0.1.0"
+version = "0.1.1"
 description = "Rust implementation of Tetris using egui."
 repository = "https://github.com/AloizioMacedo/tetris"
 authors = ["Aloizio Macedo"]

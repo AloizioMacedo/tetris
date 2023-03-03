@@ -16,7 +16,11 @@ fn main() {
         )),
         ..Default::default()
     };
-    eframe::run_native("Tetris", options, Box::new(|_cc| Box::<MyApp>::default()))
+    eframe::run_native(
+        "Quattorix",
+        options,
+        Box::new(|_cc| Box::<MyApp>::default()),
+    )
 }
 
 #[derive(Copy, Clone)]
