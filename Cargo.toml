@@ -1,5 +1,5 @@
 [package]
-name = "tetris"
+name = "tetris_gui"
 version = "0.1.0"
 authors = ["Aloizio Macedo"]
 keywords = ["gamedev", "tetris"]

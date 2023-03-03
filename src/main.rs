@@ -1,10 +1,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use egui::{Color32, Pos2, Rect, Stroke};
-use tetris::constants::{
+use tetris_gui::constants::{
     Movement, Rotation, FPS, GAME_WIDTH, HEIGHT, NEXT_PIECE_DISPLAY_WIDTH, SCALE,
 };
-use tetris::game::{new_game, EndOfGame, Game, StepKind};
+use tetris_gui::game::{new_game, EndOfGame, Game, StepKind};
 
 use std::time::{Duration, Instant};
 

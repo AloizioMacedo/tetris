@@ -1552,7 +1552,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "tetris"
+name = "tetris_gui"
 version = "0.1.0"
 dependencies = [
  "eframe",
