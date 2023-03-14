@@ -83,8 +83,7 @@ impl eframe::App for MyApp {
                 ui.centered_and_justified(|ui| ui.heading("PAUSED"));
                 return;
             } else {
-                let score = self.game.score;
-                ui.heading(format!("SCORE: {}", score));
+                ui.heading(format!("SCORE: {}", self.game.score));
             }
 
             self.paint_pieces(ui);
