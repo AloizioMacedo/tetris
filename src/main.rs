@@ -29,6 +29,7 @@ enum Command {
     Movement(Movement),
     Rotation(Rotation),
     DropDown,
+    Quit,
 }
 
 struct MyApp {
@@ -82,8 +83,7 @@ impl eframe::App for MyApp {
                 ui.centered_and_justified(|ui| ui.heading("PAUSED"));
                 return;
             } else {
-                let score = self.game.score;
-                ui.heading(format!("SCORE: {}", score));
+                ui.heading(format!("SCORE: {}", self.game.score));
             }
 
             self.paint_pieces(ui);
@@ -161,6 +161,8 @@ impl MyApp {
                 egui::Key::E => Command::Rotation(Rotation::CW),
                 egui::Key::Q => Command::Rotation(Rotation::CCW),
                 egui::Key::Z => Command::DropDown,
+                egui::Key::Escape => Command::Quit,
+
                 _ => self.current_move_command,
             }
         } else {
@@ -276,6 +278,7 @@ impl MyApp {
             } => match self.get_command(pressed, key) {
                 Command::Movement(x) => Command::Movement(x),
                 Command::DropDown => Command::DropDown,
+                Command::Quit => Command::Quit,
                 _ => self.current_move_command,
             },
             _ => self.current_move_command,
@@ -303,6 +306,7 @@ impl MyApp {
         match self.current_move_command {
             Command::Movement(movement) => self.game.step(StepKind::Move(Some(movement))).unwrap(),
             Command::DropDown => self.game.step(StepKind::HardDrop).unwrap(),
+            Command::Quit => std::process::exit(0),
             _ => (),
         }
         if let Command::Rotation(rotation) = self.current_rotation_command {

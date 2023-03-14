@@ -25,4 +25,5 @@ in the command line.
 - Arrow keys control movement;
 - Q/E controls counterclockwise and clockwise rotation respectively;
 - Z hard drops;
-- Space pauses.
+- Space pauses;
+- Escape exits.

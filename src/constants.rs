@@ -2,7 +2,7 @@ pub const SCALE: i32 = 40;
 
 pub const GAME_WIDTH: i32 = 400;
 pub const NEXT_PIECE_DISPLAY_WIDTH: i32 = 240;
-pub const HEIGHT: i32 = 800;
+pub const HEIGHT: i32 = 900;
 
 pub const FPS: f32 = 3.;
 
